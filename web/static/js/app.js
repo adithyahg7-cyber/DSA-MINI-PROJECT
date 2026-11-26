@@ -10,12 +10,12 @@ function refreshIcons() {
 }
 
 function initSpotlight() {
-  document.querySelectorAll(".spotlight").forEach((card) => {
-    card.addEventListener("mousemove", (event) => {
-      const rect = card.getBoundingClientRect();
-      card.style.setProperty("--mx", `${event.clientX - rect.left}px`);
-      card.style.setProperty("--my", `${event.clientY - rect.top}px`);
-    });
+  document.addEventListener("mousemove", (event) => {
+    const card = event.target.closest(".spotlight");
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty("--mx", `${event.clientX - rect.left}px`);
+    card.style.setProperty("--my", `${event.clientY - rect.top}px`);
   });
 }
 
@@ -144,8 +144,7 @@ function initTheme() {
 }
 
 function initLightbox() {
-  const items = document.querySelectorAll("[data-lightbox]");
-  if (!items.length) return;
+  if (document.querySelector(".lightbox")) return;
   const overlay = document.createElement("div");
   overlay.className = "lightbox";
   overlay.innerHTML = '<div class="lightbox-inner">' +
@@ -159,18 +158,17 @@ function initLightbox() {
   const download = overlay.querySelector(".lightbox-download");
   const close = () => { overlay.classList.remove("open"); media.innerHTML = ""; };
 
-  items.forEach((item) => {
-    item.addEventListener("click", (event) => {
-      if (event.target.closest(".media-actions")) return;
-      const src = item.dataset.src || item.src || item.querySelector("img, video")?.src;
-      const isVideo = (item.dataset.type || "").startsWith("video");
-      media.innerHTML = isVideo
-        ? `<video controls src="${src}"></video>`
-        : `<img src="${src}" alt="preview">`;
-      download.href = src;
-      download.setAttribute("download", src.split("/").pop() || "media");
-      overlay.classList.add("open");
-    });
+  document.addEventListener("click", (event) => {
+    const item = event.target.closest("[data-lightbox]");
+    if (!item || event.target.closest(".media-actions")) return;
+    const src = item.dataset.src || item.src || item.querySelector("img, video")?.src;
+    const isVideo = (item.dataset.type || "").startsWith("video");
+    media.innerHTML = isVideo
+      ? `<video controls src="${src}"></video>`
+      : `<img src="${src}" alt="preview">`;
+    download.href = src;
+    download.setAttribute("download", src.split("/").pop() || "media");
+    overlay.classList.add("open");
   });
   overlay.addEventListener("click", (event) => {
     if (event.target === overlay || event.target.closest(".lightbox-close") || event.target.closest(".lightbox-download")) close();
@@ -194,6 +192,7 @@ function toast(message, isError) {
 async function refreshComments(post) {
   const postId = post.id.replace("post-", "");
   const response = await fetch(`/posts/${postId}/comments`);
+  if (!response.ok) return;
   const html = await response.text();
   const holder = document.createElement("div");
   holder.innerHTML = html;
@@ -210,6 +209,7 @@ function initAjaxActions() {
     event.preventDefault();
     const kind = form.dataset.ajax;
     const post = form.closest(".post");
+    const postId = post ? post.id.replace("post-", "") : null;
     const button = form.querySelector('button[type="submit"]');
     if (button) button.disabled = true;
     try {
@@ -220,14 +220,16 @@ function initAjaxActions() {
       });
       const data = await response.json();
       if (!data.ok) { toast(data.message || "That did not work.", true); return; }
-      if ((kind === "like" || kind === "unlike") && post) {
+      if (kind === "like" || kind === "unlike") {
         const pill = form.querySelector("button.pill");
         if (pill) {
           pill.classList.toggle("liked", Boolean(data.liked));
           pill.innerHTML = `<i data-lucide="heart"></i> ${data.likes}`;
         }
+        form.dataset.ajax = data.liked ? "unlike" : "like";
+        form.action = `/posts/${postId}/${form.dataset.ajax}`;
         refreshIcons();
-      } else if ((kind === "save" || kind === "unsave") && post) {
+      } else if (kind === "save" || kind === "unsave") {
         const pill = form.querySelector("button.pill");
         if (pill) {
           pill.classList.toggle("saved", Boolean(data.saved));
@@ -235,6 +237,8 @@ function initAjaxActions() {
             ? '<i data-lucide="bookmark-check"></i> Saved'
             : '<i data-lucide="bookmark"></i> Save';
         }
+        form.dataset.ajax = data.saved ? "unsave" : "save";
+        form.action = `/posts/${postId}/${form.dataset.ajax}`;
         refreshIcons();
       } else if (kind === "comment" || kind === "delete-comment") {
         if (kind === "comment") form.reset();
@@ -246,8 +250,23 @@ function initAjaxActions() {
           }
         }
         refreshIcons();
+      } else if (kind === "post") {
+        form.reset();
+        const area = form.querySelector("textarea[data-autosize]");
+        if (area) area.dispatchEvent(new Event("input"));
+        const firstPost = document.querySelector(".post");
+        if (firstPost) {
+          firstPost.insertAdjacentHTML("beforebegin", data.html);
+        } else {
+          const empty = document.querySelector("main .empty");
+          if (empty) empty.remove();
+          const pager = document.querySelector(".pager");
+          if (pager) pager.insertAdjacentHTML("beforebegin", data.html);
+          else document.querySelector("main")?.insertAdjacentHTML("beforeend", data.html);
+        }
+        refreshIcons();
       }
-      if (data.message && kind !== "like" && kind !== "unlike" && kind !== "save" && kind !== "unsave") {
+      if (data.message && !["like", "unlike", "save", "unsave", "post"].includes(kind)) {
         toast(data.message);
       }
     } catch (error) {

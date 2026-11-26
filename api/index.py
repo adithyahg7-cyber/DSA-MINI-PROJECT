@@ -1,4 +1,4 @@
-"""Vercel serverless entry point for CU-Kizuna."""
+"""Vercel serverless entry point for CU-connect."""
 
 import seed_demo
 

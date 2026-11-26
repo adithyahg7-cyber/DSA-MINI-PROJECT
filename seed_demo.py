@@ -142,7 +142,7 @@ def main():
     events = []
     actor(engine, "admin")
     ok, message, event = engine.add_event(
-        "CU-Kizuna Hack Night",
+        "CU-connect Hack Night",
         "One evening, small teams, any stack. Bring a laptop and an idea; we bring the pizza and the extension cords.",
         "2026-12-04",
         "18:00",
@@ -152,8 +152,8 @@ def main():
         events.append(event.event_id)
     actor(engine, "riya")
     ok, message, event = engine.add_event(
-        "Design Jam: CU-Kizuna Identity",
-        "A two-hour studio session redesigning the CU-Kizuna wayfinding signs. Sketches first, software later.",
+        "Design Jam: CU-connect Identity",
+        "A two-hour studio session redesigning the CU-connect wayfinding signs. Sketches first, software later.",
         "2026-12-08",
         "16:30",
         "Design Studio, Block A",

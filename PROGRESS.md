@@ -1,4 +1,4 @@
-# CU-Kizuna Progress
+# CU-connect Progress
 
 Legend: `[x]` done, `[~]` in progress, `[ ]` pending
 

@@ -94,7 +94,7 @@
   </footer>
 
   <section class="post-comments" id="post-{{ item.post.post_id }}-comments">
-    {{ render_comments(item.comments, item.post.post_id) }}
+    <div class="comment-list-wrap">{{ render_comments(item.comments, item.post.post_id) }}</div>
     <form method="post" action="{{ url_for('comment_post', post_id=item.post.post_id) }}" class="inline-form comment-form" data-ajax="comment">
       <input type="hidden" name="next" value="{{ here }}">
       <input class="input" name="text" placeholder="Add a comment…" required>

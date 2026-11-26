@@ -1,6 +1,6 @@
-# CU-Kizuna
+# CU-connect
 
-CU-Kizuna is a social network for the DSA mini project at Chanakya University (B.Tech CS&AI).
+CU-connect is a social network for the DSA mini project at Chanakya University (B.Tech CS&AI).
 It ships two interfaces over one engine: a Flask web app and a console harness.
 
 Repository: https://github.com/vaibavl/CU-Kizuna
@@ -96,7 +96,7 @@ All demo accounts use the password `campus123`. The admin account is separate.
 | `arjun` | Arjun Menon | student |
 | `zoya` | Zoya Khan | student |
 | `pranav` | Pranav Desai | student |
-| `admin` | CU-Kizuna Admin | admin |
+| `admin` | CU-connect Admin | admin |
 
 Admin password: `admin123`.
 

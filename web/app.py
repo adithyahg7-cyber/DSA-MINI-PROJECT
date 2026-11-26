@@ -306,7 +306,7 @@ def create_app(db_path=None, testing=False):
             if ok:
                 engine().login(username, password)
                 session["user"] = username.strip().lower()
-                flash("Welcome to CU-Kizuna.", "ok")
+                flash("Welcome to CU-connect.", "ok")
                 return redirect(url_for("feed"))
             flash(message, "err")
         return render_template("auth.html", mode="signup")
@@ -359,9 +359,32 @@ def create_app(db_path=None, testing=False):
     def create_post():
         paths, error = upload_paths("media")
         if error:
+            if wants_json():
+                return jsonify({"ok": False, "message": error})
             flash(error, "err")
             return back()
-        handle(engine().create_post(request.form.get("text", ""), media_paths=paths))
+        e = engine()
+        result = e.create_post(request.form.get("text", ""), media_paths=paths)
+        if wants_json():
+            ok, message, post = result
+            if not ok:
+                return jsonify({"ok": False, "message": message})
+            item = {
+                "post": post,
+                "author": e.get_user(post.author),
+                "likes": e.like_count(post.post_id),
+                "liked": e.is_liked(post.post_id),
+                "saved": e.is_saved(post.post_id),
+                "comments": e.comment_tree(post.post_id),
+                "comment_count": e.comment_count(post.post_id),
+            }
+            return jsonify({
+                "ok": True,
+                "message": message,
+                "post_id": post.post_id,
+                "html": render_template("_post.html", item=item),
+            })
+        handle(result)
         return back()
 
     @app.post("/posts/<int:post_id>/delete")

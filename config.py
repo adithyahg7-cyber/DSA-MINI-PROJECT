@@ -12,7 +12,7 @@ UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
 
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
-ADMIN_NAME = "CU-Kizuna Admin"
+ADMIN_NAME = "CU-connect Admin"
 
 PAGE_SIZE = 10
 TRENDING_DAYS = 7

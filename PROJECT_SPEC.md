@@ -1,4 +1,4 @@
-# DSA Mini Project: CU-Kizuna (handoff spec)
+# DSA Mini Project: CU-connect (handoff spec)
 
 > Purpose: a complete plan so any LLM can continue this project without the earlier chat.
 > App name: not decided yet (student is free to name it).

@@ -1,11 +1,11 @@
 {% extends "shell.html" %}
-{% block title %}Feed — CU-Kizuna{% endblock %}
+{% block title %}Feed — CU-connect{% endblock %}
 {% block main %}
 <div class="page-head">
   <div>
     <span class="eyebrow">Home</span>
     <h1>Good to see you, {{ me_user.name.split()[0] }}.</h1>
-    <p>Your connections. Your CU-Kizuna. Your next conversation.</p>
+    <p>Your connections. Your CU-connect. Your next conversation.</p>
   </div>
   <div class="actions">
     <a class="btn btn-ghost" href="{{ url_for('search') }}"><i data-lucide="search"></i> Find people</a>
@@ -19,9 +19,9 @@
 </div>
 
 <section class="card composer spotlight reveal">
-  <form method="post" action="{{ url_for('create_post') }}" enctype="multipart/form-data">
+  <form method="post" action="{{ url_for('create_post') }}" enctype="multipart/form-data" data-ajax="post">
     <input type="hidden" name="next" value="{{ here }}">
-    <textarea name="text" data-autosize placeholder="Share something with CU-Kizuna…"></textarea>
+    <textarea name="text" data-autosize placeholder="Share something with CU-connect…"></textarea>
     <div class="composer-foot">
       <div class="composer-hint">
         <label class="file-chip"><i data-lucide="image-plus"></i> Add media<input type="file" name="media" accept="image/*,video/*" multiple></label>

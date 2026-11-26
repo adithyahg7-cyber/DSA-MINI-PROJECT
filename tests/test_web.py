@@ -37,7 +37,7 @@ class WebTests(unittest.TestCase):
     def test_landing_and_auth_pages(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"CU-Kizuna", response.data)
+        self.assertIn(b"CU-connect", response.data)
         self.assertEqual(self.client.get("/login").status_code, 200)
         self.assertEqual(self.client.get("/signup").status_code, 200)
 

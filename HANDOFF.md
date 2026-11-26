@@ -1,11 +1,11 @@
-# HANDOFF: CU-Kizuna (DSA Mini Project)
+# HANDOFF: CU-connect (DSA Mini Project)
 
 Last updated: 2026-11-26
 Read this first if the chat is lost or tokens run out.
 
 ## What this is
 
-CU-Kizuna is a social network for the DSA mini project (Chanakya University, B.Tech CS&AI).
+CU-connect is a social network for the DSA mini project (Chanakya University, B.Tech CS&AI).
 Python 3.13 + Flask 3.1 + SQLite. Submission deadline: 27-11-2026.
 
 Hard rules from `PROJECT_SPEC.md`:

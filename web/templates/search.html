@@ -1,5 +1,5 @@
 {% extends "shell.html" %}
-{% block title %}Search — CU-Kizuna{% endblock %}
+{% block title %}Search — CU-connect{% endblock %}
 {% block main %}
 <div class="page-head">
   <div>
@@ -22,12 +22,12 @@
   <div class="grid-2">
     {% for person in results %}
     <article class="card person-card reveal">
-      <span class="avatar">{{ person.name|initials }}</span>
+      <span class="avatar">{{ person.user.name|initials }}</span>
       <div class="meta">
-        <a href="{{ url_for('profile', username=person.username) }}">{{ person.name }}</a>
-        <small>@{{ person.username }} · {{ person.role }}</small>
+        <a href="{{ url_for('profile', username=person.user.username) }}">{{ person.user.name }}</a>
+        <small>@{{ person.user.username }} · {{ person.user.role }}</small>
       </div>
-      <form method="post" action="{{ url_for('send_request', username=person.username) }}">
+      <form method="post" action="{{ url_for('send_request', username=person.user.username) }}">
         <input type="hidden" name="next" value="{{ here }}">
         <button class="btn btn-ghost btn-sm" type="submit"><i data-lucide="user-plus"></i> Connect</button>
       </form>

@@ -319,7 +319,7 @@ def admin_menu(engine):
 
 def main():
     engine = Engine()
-    print("CU-Kizuna backend console")
+    print("CU-connect backend console")
     print("seeded admin:", engine.state.users.get("admin").username if "admin" in engine.state.users else "none")
     while True:
         print("\n== Main ==")

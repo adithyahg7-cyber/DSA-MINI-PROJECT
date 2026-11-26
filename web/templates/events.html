@@ -1,5 +1,5 @@
 {% extends "shell.html" %}
-{% block title %}Events — CU-Kizuna{% endblock %}
+{% block title %}Events — CU-connect{% endblock %}
 {% block main %}
 <div class="page-head">
   <div>
@@ -52,7 +52,7 @@
       <span><i data-lucide="user"></i> {{ event.organiser }}</span>
     </div>
     <div class="event-foot">
-      <span class="tag">{{ 'club event' if event.community_id else 'CU-Kizuna event' }}</span>
+      <span class="tag">{{ 'club event' if event.community_id else 'CU-connect event' }}</span>
       <a class="btn btn-ghost btn-sm" href="{{ url_for('event_detail', event_id=event.event_id) }}">Open <i data-lucide="arrow-up-right"></i></a>
     </div>
   </article>
