@@ -196,8 +196,12 @@ def create_app(db_path=None, testing=False):
 
     @app.before_request
     def prepare_request():
-        if not request.path.startswith(("/static/", "/uploads/")) and blob_sync.download():
-            db.refresh_connection()
+        g.sync_blob = not request.path.startswith(("/static/", "/uploads/"))
+        if g.sync_blob:
+            if blob_sync.download():
+                db.refresh_connection()
+            db.checkpoint()
+            g.db_hash = blob_sync.local_hash()
         username = session.get("user")
         if username and engine().get_user(username) is None:
             session.clear()
@@ -208,9 +212,10 @@ def create_app(db_path=None, testing=False):
     def finish_request(response):
         if "engine" in g:
             g.engine.state.current_user = None
-        if not request.path.startswith(("/static/", "/uploads/")):
+        if g.get("sync_blob"):
             db.checkpoint()
-            blob_sync.upload()
+            if blob_sync.local_hash() != g.get("db_hash"):
+                blob_sync.upload()
         return response
 
     @app.context_processor

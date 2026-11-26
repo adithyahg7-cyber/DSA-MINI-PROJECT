@@ -1,5 +1,6 @@
 """Sync the SQLite database file to Vercel Blob so serverless instances share state."""
 
+import hashlib
 import json
 import os
 import urllib.error
@@ -15,7 +16,8 @@ class BlobSync:
         self.path = os.environ.get("BLOB_DB_PATH", "cu-kizuna/campus.db").lstrip("/")
         self.enabled = bool(os.environ.get("VERCEL") and self.token and self.store_id)
         store_host = self.store_id.removeprefix("store_").lower()
-        self.download_url = f"https://{store_host}.private.blob.vercel-storage.com/{self.path}"
+        # cache=0 prevents an edge-cached 404 from hiding a newly uploaded DB.
+        self.download_url = f"https://{store_host}.private.blob.vercel-storage.com/{self.path}?cache=0"
         self.upload_url = "https://blob.vercel-storage.com/" + self.path
         self.local_path = config.DB_PATH
         self.etag = None
@@ -49,6 +51,16 @@ class BlobSync:
         with open(self.local_path, "wb") as handle:
             handle.write(remote)
         return True
+
+    def local_hash(self):
+        """Hash the main database file so we upload only after real changes."""
+        if not self.enabled:
+            return None
+        try:
+            with open(self.local_path, "rb") as handle:
+                return hashlib.sha256(handle.read()).hexdigest()
+        except OSError:
+            return None
 
     def upload(self):
         """Push the local database file back to Blob."""
