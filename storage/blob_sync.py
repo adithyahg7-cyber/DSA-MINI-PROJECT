@@ -19,6 +19,11 @@ class BlobSync:
         self.upload_url = "https://blob.vercel-storage.com/" + self.path
         self.local_path = config.DB_PATH
         self.etag = None
+        print(
+            f"BlobSync enabled={self.enabled} vercel={bool(os.environ.get('VERCEL'))} "
+            f"token={bool(self.token)} store={bool(self.store_id)} path={self.path} "
+            f"local={self.local_path}"
+        )
 
     def download(self):
         """Pull the latest database file into /tmp. Returns True when it changed."""
@@ -33,10 +38,10 @@ class BlobSync:
                 remote = response.read()
                 self.etag = response.headers.get("ETag")
         except urllib.error.HTTPError as exc:
-            if exc.code == 404:
-                return False
+            print(f"BlobSync download HTTP {exc.code}: {exc.read()[:200]!r}")
             return False
-        except Exception:
+        except Exception as exc:
+            print(f"BlobSync download failed: {exc!r}")
             return False
 
         try:
@@ -77,7 +82,11 @@ class BlobSync:
                 result = json.loads(response.read().decode("utf-8") or "{}")
                 self.etag = result.get("etag", self.etag)
                 return True
-        except Exception:
+        except urllib.error.HTTPError as exc:
+            print(f"BlobSync upload HTTP {exc.code}: {exc.read()[:200]!r}")
+            return False
+        except Exception as exc:
+            print(f"BlobSync upload failed: {exc!r}")
             return False
 
 
