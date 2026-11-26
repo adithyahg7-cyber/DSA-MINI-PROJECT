@@ -131,7 +131,7 @@ function initTheme() {
   if (!button) return;
   const apply = (theme) => {
     document.documentElement.dataset.theme = theme;
-    try { localStorage.setItem("campus-theme", theme); } catch (error) { /* storage blocked */ }
+    try { localStorage.setItem("kizuna-theme", theme); } catch (error) { /* storage blocked */ }
     const meta = document.getElementById("theme-color");
     if (meta) meta.content = theme === "dark" ? "#0f1226" : "#dcd6f7";
     button.innerHTML = theme === "dark" ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';

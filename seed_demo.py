@@ -8,7 +8,7 @@ PEOPLE = [
     ("ananya", "Ananya Rao", "B.Tech CS&AI. Robotics, graph theory and far too much filter coffee."),
     ("riya", "Riya Nair", "Product design. I make things look like they were always meant that way."),
     ("kabir", "Kabir Shah", "Backend and databases. SQLite apologist."),
-    ("meera", "Meera Iyer", "Data science, cricket analytics, and long walks around campus."),
+    ("meera", "Meera Iyer", "Data science, cricket analytics, and long walks across the quad."),
     ("arjun", "Arjun Menon", "Film club. Ask me for a recommendation, not a short one."),
     ("zoya", "Zoya Khan", "Music, open mics, and finding the quietest corner of the library."),
     ("pranav", "Pranav Desai", "Second year. Here for the events."),
@@ -153,7 +153,7 @@ def main():
     actor(engine, "riya")
     ok, message, event = engine.add_event(
         "Design Jam: CU-Kizuna Identity",
-        "A two-hour studio session redesigning the campus wayfinding signs. Sketches first, software later.",
+        "A two-hour studio session redesigning the CU-Kizuna wayfinding signs. Sketches first, software later.",
         "2026-12-08",
         "16:30",
         "Design Studio, Block A",

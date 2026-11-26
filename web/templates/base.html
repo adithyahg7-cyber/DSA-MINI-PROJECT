@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}CU-Kizuna — your network, in motion{% endblock %}</title>
   <meta name="description" content="CU-Kizuna: connections, feeds, events and communities.">
-  <meta name="theme-color" id="theme-color" content="#dcd6f7">
+  <meta name="theme-color" id="theme-color" content="#c4b3a5">
   <script>
     (function () {
       try {
-        var saved = localStorage.getItem("campus-theme");
+        var saved = localStorage.getItem("kizuna-theme");
         if (saved !== "light" && saved !== "dark") saved = "light";
         document.documentElement.dataset.theme = saved;
-        document.getElementById("theme-color").content = saved === "dark" ? "#0f1226" : "#dcd6f7";
+        document.getElementById("theme-color").content = saved === "dark" ? "#18130f" : "#c4b3a5";
       } catch (e) {
         document.documentElement.dataset.theme = "light";
       }

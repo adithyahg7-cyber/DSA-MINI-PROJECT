@@ -49,15 +49,16 @@
       <span class="orb orb-2"></span>
       <div class="graph-card" id="graph">
         <div class="mini-nav"><i></i><i></i><i></i></div>
+        <div class="graph-card-title">CHANAKYA UNIVERSITY</div>
         <svg viewBox="0 0 420 360" role="img" aria-label="CU-Kizuna connection graph">
           <defs>
             <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#7c5cff" stop-opacity="0.85"/>
-              <stop offset="1" stop-color="#22d3ee" stop-opacity="0.35"/>
+              <stop offset="0" stop-color="#e7a743" stop-opacity="0.85"/>
+              <stop offset="1" stop-color="#c49837" stop-opacity="0.35"/>
             </linearGradient>
             <radialGradient id="nodeFill">
-              <stop offset="0" stop-color="#a78bfa"/>
-              <stop offset="1" stop-color="#4c1d95"/>
+              <stop offset="0" stop-color="#daa244"/>
+              <stop offset="1" stop-color="#8b550a"/>
             </radialGradient>
           </defs>
           <g stroke="url(#edge)" stroke-width="1.2" opacity="0.65">
@@ -79,7 +80,7 @@
             <circle cx="355" cy="200" r="8" opacity=".7"/>
             <circle cx="150" cy="305" r="6" opacity=".6"/>
           </g>
-          <g fill="#e9d5ff" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">
+          <g fill="#fff6dc" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">
             <text x="210" y="174">you</text>
           </g>
           <g class="node-label" text-anchor="middle">
@@ -90,24 +91,16 @@
           </g>
         </svg>
       </div>
-      <span class="graph-pill p1"><i data-lucide="git-branch"></i> degree 2</span>
-      <span class="graph-pill p2"><i data-lucide="users"></i> 4 mutuals</span>
-      <span class="graph-pill p3"><i data-lucide="zap"></i> BFS · O(V+E)</span>
     </div>
   </section>
 
   <section class="section" id="features">
     <div class="section-head scroll-reveal">
       <span class="eyebrow">Built for Chanakya University</span>
-      <h2>Everything a campus network needs, without the noise.</h2>
+      <h2>Everything a CU-Kizuna network needs, without the noise.</h2>
       <p>Each feature maps to a data structure you can defend in the viva.</p>
     </div>
     <div class="bento stagger">
-      <article class="bento-card wide">
-        <span class="feature-icon"><i data-lucide="network"></i></span>
-        <h3>Graph intelligence</h3>
-        <p>Adjacency sets, BFS shortest chains up to three hops, mutual connections and Jaccard-ranked suggestions.</p>
-      </article>
       <article class="bento-card wide">
         <span class="feature-icon"><i data-lucide="layers"></i></span>
         <h3>Two feeds, one engine</h3>
@@ -175,6 +168,6 @@
 <footer class="site-footer">
   <span>CU-Kizuna · DSA mini project · Python + SQLite + Flask</span>
   <span>Graphs in memory. Rows in SQLite. No shortcuts.</span>
-  <span><a href="https://chanakyauniversity.edu.in/campus/" target="_blank" rel="noopener">Campus photo: Chanakya University</a></span>
+  <span><a href="https://chanakyauniversity.edu.in/campus/" target="_blank" rel="noopener">Photo: Chanakya University</a></span>
 </footer>
 {% endblock %}

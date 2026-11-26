@@ -42,7 +42,7 @@ Legend: `[x]` done, `[~]` in progress, `[ ]` pending
 - [x] direct messages: conversation list, bubbles, unread badge, connected-users only
 - [x] communities: clubs, public groups, private groups with approval
 - [x] admin + alerts: roles, moderation queue, pitch review, graph tools, notifications
-- [x] Glass Soft design system: light/dark gradient, frosted glass, subtle glow, persisted toggle
+- [x] Campus Amber design system: warm brown/amber light + dark surfaces, watermark, persisted toggle
 - [x] composer: photo/video upload chips for feed and community posts
 - [x] settings: profile photo upload
 - [x] responsive shell, CSS + JS effects

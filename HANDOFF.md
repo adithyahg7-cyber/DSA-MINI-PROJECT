@@ -5,7 +5,7 @@ Read this first if the chat is lost or tokens run out.
 
 ## What this is
 
-CU-Kizuna is a campus social network for the DSA mini project (Chanakya University, B.Tech CS&AI).
+CU-Kizuna is a social network for the DSA mini project (Chanakya University, B.Tech CS&AI).
 Python 3.13 + Flask 3.1 + SQLite. Submission deadline: 27-11-2026.
 
 Hard rules from `PROJECT_SPEC.md`:
@@ -21,7 +21,7 @@ Hard rules from `PROJECT_SPEC.md`:
 
 - Backend: complete. 17/17 core tests pass. Console harness works end to end.
 - Frontend: complete. 12/12 web tests pass. All pages below are implemented.
-- Redesign pass: complete. Glass Soft light/dark theme, post media, profile photos,
+- Redesign pass: complete. Campus Amber light/dark theme, post media, profile photos,
   calendar month view, DMs, catalog lightbox, AJAX post actions, comment deletion,
   and admin-only graph tools are all wired and smoke-tested.
 - Demo data: seeded by `seed_demo.py`. It exits without changes if demo users exist.
@@ -99,7 +99,8 @@ web/
   templates/              base shell landing auth feed _post _comments _comments_fragment
                           network search profile settings saved notifications events event_detail
                           calendar messages communities community_detail admin error
-  static/css/app.css      Glass Soft light/dark design system
+  static/css/app.css      Campus Amber light/dark design system
+  static/img/             logo.jpg, campus-background.webp, amber-watermark.svg
   static/js/app.js        theme toggle, lightbox, AJAX post actions, animations
 tests/
   test_core.py            17 tests, all passing
@@ -151,7 +152,7 @@ before the redesign.
 | Direct messages | `state.messages` | `messages` table (`is_read`) | no separate file storage |
 | Comment deletion | removed from `state.comments` recursively | rows deleted from `comments` | no separate file storage |
 | Calendar month | derived from `state.events` | `events` table | no new table |
-| Theme | `document.documentElement.dataset.theme` | not stored server-side | `localStorage["campus-theme"]` |
+| Theme | `document.documentElement.dataset.theme` | not stored server-side | `localStorage["kizuna-theme"]` |
 
 ## Engine API (the only thing the UI should call)
 
@@ -193,11 +194,13 @@ Files are listed in the file map above. All templates named there exist.
 Session model: Flask `session["user"]`; `before_request` sets `engine.state.current_user`;
 `after_request` clears it; the app runs single-threaded (`threaded=False`) to avoid races.
 
-Design: Glass Soft. Light mode is `#DCD6F7` lavender to `#F4B8D8` pink with one violet
-accent `#7C6CF0`. Dark mode is `#0F1226` midnight navy to `#1E2F6B` midnight blue with
-accent `#9AA6EE` (chosen blue-violet blend). Frosted glass, subtle glow, Space Grotesk +
-Inter, lucide icons via CDN, GSAP + ScrollTrigger via CDN. The toggle is persisted in
-`localStorage` and applied before CSS loads to avoid a flash.
+Design: Campus Amber. Light mode is warm beige `#C4B3A5` to `#B8A392` with amber
+accent `#945F04` and cream text on accent `#FFF6DC`. Dark mode is near-black brown
+`#18130F` to warm glow `#2A1C12` with amber accent `#E7A743` and dark brown text on
+accent `#220600`. Cards, chips, date tiles and active menu items use the measured
+surface colours from the supplied scheme PDF. A faint sun-and-leaf watermark sits behind
+the main feed. Space Grotesk + Inter, lucide icons via CDN, GSAP + ScrollTrigger via CDN.
+The toggle is persisted in `localStorage["kizuna-theme"]` and applied before CSS loads.
 
 Effects: spotlight hover, reveal and stagger on load, ScrollTrigger scroll reveals,
 magnetic buttons, tilt cards, count-up stats, toasts, app rail, search shortcut,

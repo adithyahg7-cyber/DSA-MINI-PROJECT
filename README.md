@@ -1,6 +1,6 @@
 # CU-Kizuna
 
-CU-Kizuna is a campus social network for the DSA mini project at Chanakya University (B.Tech CS&AI).
+CU-Kizuna is a social network for the DSA mini project at Chanakya University (B.Tech CS&AI).
 It ships two interfaces over one engine: a Flask web app and a console harness.
 
 Repository: https://github.com/vaibavl/CU-Kizuna
@@ -44,7 +44,7 @@ templates. Only admins can change roles, and the last admin cannot be demoted.
 - Pure Python core for all DSA logic
 - Vanilla JavaScript, CSS, GSAP + ScrollTrigger and lucide icons via CDN
 - Space Grotesk and Inter from Google Fonts
-- Dark aurora and glass theme with reduced-motion fallbacks
+- Campus Amber light/dark theme with reduced-motion fallbacks
 
 ## Setup
 
