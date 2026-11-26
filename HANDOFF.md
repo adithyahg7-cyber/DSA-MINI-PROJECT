@@ -112,7 +112,7 @@ seed_demo.py              demo users, posts, events, communities, pitches
 
 ## State object (`core/state.py`)
 
-- `users: dict[username -> User]` (`User.avatar` holds an `/uploads/...` path or `None`)
+- `users: dict[username -> User]` (`User.avatar` holds a bare upload filename or `None`)
 - `adj: dict[username -> set[username]]`
 - `pending_out / pending_in: dict[username -> dict[other -> ts]]`
 - `posts: dict[id -> Post]`, `user_posts: dict[username -> list[id]]`, `all_posts: list[id]` (oldest first)
@@ -147,7 +147,7 @@ before the redesign.
 | Feature | In memory | SQLite | Files / browser |
 |---|---|---|---|
 | Post photos/videos | `Post.media` + `state.post_media` | `post_media` table | `uploads/`; path stored as `/uploads/<name>` |
-| Profile photo | `User.avatar` | `users.avatar` | `uploads/`; path stored as `/uploads/<name>` |
+| Profile photo | `User.avatar` | `users.avatar` | `uploads/`; stored as bare `<name>` and linked with `url_for('uploaded', ...)` |
 | Event catalog | `state.catalog` | `media` table | `uploads/`; shown through lightbox with download + X |
 | Direct messages | `state.messages` | `messages` table (`is_read`) | no separate file storage |
 | Comment deletion | removed from `state.comments` recursively | rows deleted from `comments` | no separate file storage |

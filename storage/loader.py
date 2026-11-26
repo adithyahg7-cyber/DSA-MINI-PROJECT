@@ -28,6 +28,11 @@ def load(state):
     state.reset()
 
     for row in db.query("SELECT * FROM users ORDER BY created_at"):
+        avatar = row.get("avatar")
+        # Older records stored a full /uploads/... path, which templates then
+        # prefixed again. Keep avatar values as bare upload filenames.
+        if avatar and avatar.startswith("/uploads/"):
+            avatar = avatar[len("/uploads/"):]
         user = User(
             username=row["username"],
             name=row["name"],
@@ -36,7 +41,7 @@ def load(state):
             role=row["role"],
             bio=row["bio"],
             created_at=row["created_at"],
-            avatar=row.get("avatar"),
+            avatar=avatar,
         )
         state.users[user.username] = user
         state.adj.setdefault(user.username, set())

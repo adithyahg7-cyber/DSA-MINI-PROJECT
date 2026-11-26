@@ -536,7 +536,7 @@ def create_app(db_path=None, testing=False):
         if error:
             flash(error, "err")
             return back("settings")
-        handle(engine().update_avatar(f"/uploads/{filename}"))
+        handle(engine().update_avatar(filename))
         return back("settings")
 
     @app.get("/saved")
