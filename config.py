@@ -2,8 +2,13 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DB_PATH = os.path.join(BASE_DIR, "campus.db")
-UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
+# Vercel serverless functions have a read-only project filesystem; use /tmp for
+# the SQLite database and uploaded media there. Local development stays in the
+# project directory.
+DATA_DIR = "/tmp" if os.environ.get("VERCEL") else BASE_DIR
+
+DB_PATH = os.path.join(DATA_DIR, "campus.db")
+UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
 
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"

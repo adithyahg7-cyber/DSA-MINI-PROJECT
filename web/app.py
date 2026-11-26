@@ -36,13 +36,14 @@ def load_secret():
     secret = os.environ.get("CAMPUS_SECRET")
     if secret:
         return secret
-    path = os.path.join(config.BASE_DIR, ".campus_secret")
+    path = os.path.join(config.DATA_DIR, ".campus_secret")
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as handle:
             stored = handle.read().strip()
         if stored:
             return stored
     secret = secrets.token_hex(32)
+    os.makedirs(config.DATA_DIR, exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
         handle.write(secret)
     return secret
