@@ -550,6 +550,19 @@ body.public::before {
 }
 [data-theme="dark"] body.public::before { opacity: 0.05; }
 
+body.app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url("../img/logo.jpg") right 4% bottom 4% / min(42vw, 460px) auto no-repeat;
+  opacity: 0.1;
+  filter: grayscale(1) contrast(1.15) blur(0.5px);
+  mix-blend-mode: soft-light;
+}
+[data-theme="dark"] body.app::before { opacity: 0.14; mix-blend-mode: screen; }
+
 .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 40px; align-items: center; padding: 60px 0 40px; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px;

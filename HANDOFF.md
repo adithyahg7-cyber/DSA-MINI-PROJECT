@@ -100,7 +100,7 @@ web/
                           network search profile settings saved notifications events event_detail
                           calendar messages communities community_detail admin error
   static/css/app.css      Campus Amber light/dark design system
-  static/img/             logo.jpg, campus-background.webp, amber-watermark.svg
+  static/img/             logo.jpg (user logo; also post-login background watermark), campus-background.webp, amber-watermark.svg
   static/js/app.js        theme toggle, lightbox, AJAX post actions, animations
 tests/
   test_core.py            17 tests, all passing
