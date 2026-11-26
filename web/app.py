@@ -209,6 +209,7 @@ def create_app(db_path=None, testing=False):
         if "engine" in g:
             g.engine.state.current_user = None
         if not request.path.startswith(("/static/", "/uploads/")):
+            db.checkpoint()
             blob_sync.upload()
         return response
 

@@ -206,6 +206,16 @@ def set_db_path(path):
         _conn = None
 
 
+def checkpoint():
+    """Flush any pending journal data into the main database file."""
+    with _lock:
+        conn = get_conn()
+        try:
+            conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        except sqlite3.Error:
+            pass
+
+
 def refresh_connection():
     """Close the cached connection so a refreshed database file can be reloaded."""
     global _conn

@@ -19,11 +19,6 @@ class BlobSync:
         self.upload_url = "https://blob.vercel-storage.com/" + self.path
         self.local_path = config.DB_PATH
         self.etag = None
-        print(
-            f"BlobSync enabled={self.enabled} vercel={bool(os.environ.get('VERCEL'))} "
-            f"token={bool(self.token)} store={bool(self.store_id)} path={self.path} "
-            f"local={self.local_path}"
-        )
 
     def download(self):
         """Pull the latest database file into /tmp. Returns True when it changed."""
@@ -37,7 +32,6 @@ class BlobSync:
             with urllib.request.urlopen(request, timeout=15) as response:
                 remote = response.read()
                 self.etag = response.headers.get("ETag")
-                print(f"BlobSync download ok bytes={len(remote)} etag={self.etag}")
         except urllib.error.HTTPError as exc:
             print(f"BlobSync download HTTP {exc.code}: {exc.read()[:200]!r}")
             return False
@@ -48,7 +42,6 @@ class BlobSync:
         try:
             with open(self.local_path, "rb") as handle:
                 if handle.read() == remote:
-                    print("BlobSync download unchanged")
                     return False
         except OSError:
             pass
@@ -83,7 +76,6 @@ class BlobSync:
             with urllib.request.urlopen(request, timeout=15) as response:
                 result = json.loads(response.read().decode("utf-8") or "{}")
                 self.etag = result.get("etag", self.etag)
-                print(f"BlobSync upload ok path={result.get('pathname')} etag={self.etag}")
                 return True
         except urllib.error.HTTPError as exc:
             print(f"BlobSync upload HTTP {exc.code}: {exc.read()[:200]!r}")

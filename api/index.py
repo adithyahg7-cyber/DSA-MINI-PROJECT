@@ -17,6 +17,7 @@ try:
 except Exception as exc:  # pragma: no cover - deployment safety net
     print(f"Seed skipped: {exc}")
 
+db.checkpoint()
 blob_sync.upload()
 
 handler = app
