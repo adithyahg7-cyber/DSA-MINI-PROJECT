@@ -196,7 +196,7 @@ def create_app(db_path=None, testing=False):
 
     @app.before_request
     def prepare_request():
-        g.sync_blob = not request.path.startswith(("/static/", "/uploads/"))
+        g.sync_blob = not request.path.startswith("/static/")
         if g.sync_blob:
             if blob_sync.download():
                 db.refresh_connection()
