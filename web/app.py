@@ -13,29 +13,39 @@ from flask import (
     abort,
     current_app,
     flash,
+    g,
     jsonify,
     redirect,
     render_template,
     request,
+    send_file,
     send_from_directory,
     session,
     url_for,
 )
+from io import BytesIO
 from werkzeug.utils import secure_filename
 
 from core.engine import Engine
+from storage import db
+from storage.blob_sync import blob_sync
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "mp4", "webm", "mov"}
 
 
 def engine():
-    return current_app.config["ENGINE"]
+    if "engine" not in g:
+        g.engine = Engine(current_app.config["DB_PATH"])
+    return g.engine
 
 
 def load_secret():
     secret = os.environ.get("CAMPUS_SECRET")
     if secret:
         return secret
+    if os.environ.get("VERCEL"):
+        # Stable across serverless instances when no secret is configured.
+        return "cu-kizuna-demo-secret"
     path = os.path.join(config.DATA_DIR, ".campus_secret")
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as handle:
@@ -120,7 +130,7 @@ def save_upload(file):
     if extension not in ALLOWED_EXTENSIONS:
         return None, "Unsupported file type."
     filename = f"{uuid.uuid4().hex}-{secure_filename(file.filename)}"
-    file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
+    db.save_blob(filename, file.read(), file.mimetype or "application/octet-stream")
     return filename, None
 
 
@@ -180,10 +190,14 @@ def create_app(db_path=None, testing=False):
     app.config["TESTING"] = testing
     os.makedirs(config.UPLOAD_DIR, exist_ok=True)
 
-    app.config["ENGINE"] = Engine(db_path)
+    resolved_db_path = db_path or config.DB_PATH
+    app.config["DB_PATH"] = resolved_db_path
+    app.config["ENGINE"] = Engine(resolved_db_path)
 
     @app.before_request
-    def load_actor():
+    def prepare_request():
+        if not request.path.startswith(("/static/", "/uploads/")) and blob_sync.download():
+            db.refresh_connection()
         username = session.get("user")
         if username and engine().get_user(username) is None:
             session.clear()
@@ -191,8 +205,11 @@ def create_app(db_path=None, testing=False):
         engine().state.current_user = username
 
     @app.after_request
-    def clear_actor(response):
-        engine().state.current_user = None
+    def finish_request(response):
+        if "engine" in g:
+            g.engine.state.current_user = None
+        if not request.path.startswith(("/static/", "/uploads/")):
+            blob_sync.upload()
         return response
 
     @app.context_processor
@@ -653,7 +670,7 @@ def create_app(db_path=None, testing=False):
             flash("Unsupported file type.", "err")
             return back("events")
         filename = f"{uuid.uuid4().hex}-{secure_filename(file.filename)}"
-        file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
+        db.save_blob(filename, file.read(), file.mimetype or "application/octet-stream")
         handle(engine().upload_media(event_id, f"/uploads/{filename}"))
         return redirect(url_for("event_detail", event_id=event_id))
 
@@ -848,6 +865,13 @@ def create_app(db_path=None, testing=False):
 
     @app.get("/uploads/<path:filename>")
     def uploaded(filename):
+        entry = db.get_blob(filename)
+        if entry:
+            return send_file(
+                BytesIO(entry["data"]),
+                mimetype=entry["content_type"],
+                download_name=filename,
+            )
         return send_from_directory(current_app.config["UPLOAD_FOLDER"], filename)
 
     @app.errorhandler(403)

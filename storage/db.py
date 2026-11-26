@@ -165,6 +165,12 @@ CREATE TABLE IF NOT EXISTS reports (
     decided_by TEXT,
     decided_at REAL
 );
+
+CREATE TABLE IF NOT EXISTS uploads (
+    path TEXT PRIMARY KEY,
+    data BLOB NOT NULL,
+    content_type TEXT NOT NULL DEFAULT 'application/octet-stream'
+);
 """
 
 TABLES = (
@@ -187,6 +193,7 @@ TABLES = (
     "rsvps",
     "saved_posts",
     "reports",
+    "uploads",
 )
 
 
@@ -196,6 +203,15 @@ def set_db_path(path):
         if _conn is not None:
             _conn.close()
         _db_path = path
+        _conn = None
+
+
+def refresh_connection():
+    """Close the cached connection so a refreshed database file can be reloaded."""
+    global _conn
+    with _lock:
+        if _conn is not None:
+            _conn.close()
         _conn = None
 
 
@@ -459,3 +475,15 @@ def rename_user(old, new):
         for sql, params in statements:
             conn.execute(sql, params)
         conn.commit()
+
+
+def save_blob(path, data, content_type):
+    execute(
+        "INSERT OR REPLACE INTO uploads (path, data, content_type) VALUES (?, ?, ?)",
+        (path, data, content_type or "application/octet-stream"),
+    )
+
+
+def get_blob(path):
+    rows = query("SELECT data, content_type FROM uploads WHERE path = ?", (path,))
+    return rows[0] if rows else None

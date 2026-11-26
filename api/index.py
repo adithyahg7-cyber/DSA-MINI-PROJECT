@@ -2,15 +2,21 @@
 
 import seed_demo
 
+from storage import db
+from storage.blob_sync import blob_sync
 from web.app import app
 
-# A fresh Vercel instance starts with an empty /tmp database, so populate the
-# demo accounts, posts and events once per cold start.
+# Pull the shared database before seeding so warm instances see the same data.
+blob_sync.download()
+db.refresh_connection()
+app.config["ENGINE"].reload()
+
 try:
     seed_demo.main()
-    # The app's Engine loaded its in-memory state before seeding, so refresh it.
     app.config["ENGINE"].reload()
 except Exception as exc:  # pragma: no cover - deployment safety net
     print(f"Seed skipped: {exc}")
+
+blob_sync.upload()
 
 handler = app
