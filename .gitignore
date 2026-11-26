@@ -13,3 +13,5 @@ venv/
 .pytest_cache/
 .DS_Store
 Thumbs.db
+
+.vercel

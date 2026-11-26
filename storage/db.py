@@ -1,10 +1,12 @@
 import os
 import sqlite3
+import threading
 
 import config
 
 _db_path = config.DB_PATH
 _conn = None
+_lock = threading.RLock()
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
@@ -190,42 +192,50 @@ TABLES = (
 
 def set_db_path(path):
     global _db_path, _conn
-    if _conn is not None:
-        _conn.close()
-    _db_path = path
-    _conn = None
+    with _lock:
+        if _conn is not None:
+            _conn.close()
+        _db_path = path
+        _conn = None
 
 
 def get_conn():
     global _conn
-    if _conn is None:
-        directory = os.path.dirname(_db_path)
-        if directory:
-            os.makedirs(directory, exist_ok=True)
-        _conn = sqlite3.connect(_db_path)
-        _conn.row_factory = sqlite3.Row
-        _conn.execute("PRAGMA journal_mode=WAL")
-    return _conn
+    with _lock:
+        if _conn is None:
+            directory = os.path.dirname(_db_path)
+            if directory:
+                os.makedirs(directory, exist_ok=True)
+            # Vercel creates the connection during cold start but serves the
+            # request from a different thread, so allow cross-thread use and
+            # serialize access with _lock.
+            _conn = sqlite3.connect(_db_path, check_same_thread=False)
+            _conn.row_factory = sqlite3.Row
+            _conn.execute("PRAGMA journal_mode=WAL")
+        return _conn
 
 
 def execute(sql, params=()):
-    conn = get_conn()
-    cursor = conn.execute(sql, params)
-    conn.commit()
-    return cursor
+    with _lock:
+        conn = get_conn()
+        cursor = conn.execute(sql, params)
+        conn.commit()
+        return cursor
 
 
 def query(sql, params=()):
-    return [dict(row) for row in get_conn().execute(sql, params).fetchall()]
+    with _lock:
+        return [dict(row) for row in get_conn().execute(sql, params).fetchall()]
 
 
 def init_db():
-    conn = get_conn()
-    conn.executescript(SCHEMA)
-    columns = {row["name"] for row in conn.execute("PRAGMA table_info(users)").fetchall()}
-    if "avatar" not in columns:
-        conn.execute("ALTER TABLE users ADD COLUMN avatar TEXT")
-    conn.commit()
+    with _lock:
+        conn = get_conn()
+        conn.executescript(SCHEMA)
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(users)").fetchall()}
+        if "avatar" not in columns:
+            conn.execute("ALTER TABLE users ADD COLUMN avatar TEXT")
+        conn.commit()
 
 
 def clear_all():
@@ -419,32 +429,33 @@ def delete_reports_for_post(post_id):
 
 
 def rename_user(old, new):
-    conn = get_conn()
-    statements = (
-        ("UPDATE users SET username = ? WHERE username = ?", (new, old)),
-        ("UPDATE connections SET user_a = ? WHERE user_a = ?", (new, old)),
-        ("UPDATE connections SET user_b = ? WHERE user_b = ?", (new, old)),
-        ("UPDATE pending SET sender = ? WHERE sender = ?", (new, old)),
-        ("UPDATE pending SET receiver = ? WHERE receiver = ?", (new, old)),
-        ("UPDATE posts SET author = ? WHERE author = ?", (new, old)),
-        ("UPDATE comments SET author = ? WHERE author = ?", (new, old)),
-        ("UPDATE likes SET username = ? WHERE username = ?", (new, old)),
-        ("UPDATE post_media SET uploader = ? WHERE uploader = ?", (new, old)),
-        ("UPDATE messages SET sender = ? WHERE sender = ?", (new, old)),
-        ("UPDATE messages SET receiver = ? WHERE receiver = ?", (new, old)),
-        ("UPDATE notifications SET username = ? WHERE username = ?", (new, old)),
-        ("UPDATE events SET organiser = ? WHERE organiser = ?", (new, old)),
-        ("UPDATE media SET uploader = ? WHERE uploader = ?", (new, old)),
-        ("UPDATE pitches SET proposer = ? WHERE proposer = ?", (new, old)),
-        ("UPDATE communities SET owner = ? WHERE owner = ?", (new, old)),
-        ("UPDATE community_members SET username = ? WHERE username = ?", (new, old)),
-        ("UPDATE role_log SET actor = ? WHERE actor = ?", (new, old)),
-        ("UPDATE role_log SET target = ? WHERE target = ?", (new, old)),
-        ("UPDATE rsvps SET username = ? WHERE username = ?", (new, old)),
-        ("UPDATE saved_posts SET username = ? WHERE username = ?", (new, old)),
-        ("UPDATE reports SET reporter = ? WHERE reporter = ?", (new, old)),
-        ("UPDATE reports SET decided_by = ? WHERE decided_by = ?", (new, old)),
-    )
-    for sql, params in statements:
-        conn.execute(sql, params)
-    conn.commit()
+    with _lock:
+        conn = get_conn()
+        statements = (
+            ("UPDATE users SET username = ? WHERE username = ?", (new, old)),
+            ("UPDATE connections SET user_a = ? WHERE user_a = ?", (new, old)),
+            ("UPDATE connections SET user_b = ? WHERE user_b = ?", (new, old)),
+            ("UPDATE pending SET sender = ? WHERE sender = ?", (new, old)),
+            ("UPDATE pending SET receiver = ? WHERE receiver = ?", (new, old)),
+            ("UPDATE posts SET author = ? WHERE author = ?", (new, old)),
+            ("UPDATE comments SET author = ? WHERE author = ?", (new, old)),
+            ("UPDATE likes SET username = ? WHERE username = ?", (new, old)),
+            ("UPDATE post_media SET uploader = ? WHERE uploader = ?", (new, old)),
+            ("UPDATE messages SET sender = ? WHERE sender = ?", (new, old)),
+            ("UPDATE messages SET receiver = ? WHERE receiver = ?", (new, old)),
+            ("UPDATE notifications SET username = ? WHERE username = ?", (new, old)),
+            ("UPDATE events SET organiser = ? WHERE organiser = ?", (new, old)),
+            ("UPDATE media SET uploader = ? WHERE uploader = ?", (new, old)),
+            ("UPDATE pitches SET proposer = ? WHERE proposer = ?", (new, old)),
+            ("UPDATE communities SET owner = ? WHERE owner = ?", (new, old)),
+            ("UPDATE community_members SET username = ? WHERE username = ?", (new, old)),
+            ("UPDATE role_log SET actor = ? WHERE actor = ?", (new, old)),
+            ("UPDATE role_log SET target = ? WHERE target = ?", (new, old)),
+            ("UPDATE rsvps SET username = ? WHERE username = ?", (new, old)),
+            ("UPDATE saved_posts SET username = ? WHERE username = ?", (new, old)),
+            ("UPDATE reports SET reporter = ? WHERE reporter = ?", (new, old)),
+            ("UPDATE reports SET decided_by = ? WHERE decided_by = ?", (new, old)),
+        )
+        for sql, params in statements:
+            conn.execute(sql, params)
+        conn.commit()
