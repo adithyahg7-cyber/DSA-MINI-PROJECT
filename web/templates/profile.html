@@ -1,0 +1,58 @@
+{% extends "shell.html" %}
+{% block title %}{{ user.name }} — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="profile-cover"></div>
+<section class="card glass" style="margin-bottom:18px">
+  <div class="profile-head">
+    {% if user.avatar %}
+    <img class="avatar avatar-lg" src="{{ url_for('uploaded', filename=user.avatar) }}" alt="{{ user.name }}">
+    {% else %}
+    <span class="avatar avatar-lg">{{ user.name|initials }}</span>
+    {% endif %}
+    <div class="profile-id">
+      <h1>{{ user.name }}</h1>
+      <span class="handle">@{{ user.username }} · {{ user.role }}</span>
+    </div>
+    <div class="actions">
+      {% if is_self %}
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('settings') }}"><i data-lucide="settings"></i> Edit profile</a>
+      {% elif degree == 1 %}
+      <span class="tag lime"><i data-lucide="check"></i> Connected</span>
+      <a class="btn btn-primary btn-sm" href="{{ url_for('conversation', username=user.username) }}"><i data-lucide="message-circle"></i> Message</a>
+      <form method="post" action="{{ url_for('remove_connection', username=user.username) }}">
+        <input type="hidden" name="next" value="{{ here }}">
+        <button class="btn btn-ghost btn-sm" type="submit">Remove</button>
+      </form>
+      {% else %}
+      <form method="post" action="{{ url_for('send_request', username=user.username) }}">
+        <input type="hidden" name="next" value="{{ here }}">
+        <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="user-plus"></i> Connect</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  <div style="padding: 0 20px 18px">
+    <p class="muted">{{ user.bio or 'No bio yet.' }}</p>
+    <div class="stat-grid">
+      <div class="stat"><strong>{{ items|length }}</strong><small>Posts</small></div>
+      <div class="stat"><strong>{{ connection_count }}</strong><small>Connections</small></div>
+      <div class="stat"><strong>{{ 'self' if is_self else degree }}</strong><small>Degree</small></div>
+    </div>
+    {% if mutual %}
+    <div class="chip-row" style="margin-top:14px">
+      <span class="tag violet">{{ mutual|length }} mutual</span>
+      {% for name in mutual %}
+      <a class="tag" href="{{ url_for('profile', username=name) }}">{{ name }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<div class="card-head"><h3>Posts</h3><span class="tag">{{ items|length }}</span></div>
+{% if items %}
+  {% for item in items %}{% include "_post.html" %}{% endfor %}
+{% else %}
+  <div class="empty"><strong>No posts yet.</strong>{% if is_self %} Share your first update from the feed.{% endif %}</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "shell.html" %}
+{% block title %}{{ community.name }} — CU-Kizuna{% endblock %}
+{% block main %}
+<a class="btn btn-ghost btn-sm" href="{{ url_for('communities') }}" style="margin-bottom:16px"><i data-lucide="arrow-left"></i> All communities</a>
+
+<section class="card glass reveal" style="margin-bottom:18px">
+  <div class="profile-head" style="padding:0; align-items:flex-start">
+    <span class="avatar avatar-lg" style="border-radius:22px">{{ community.name|initials }}</span>
+    <div class="profile-id">
+      <div class="chip-row" style="margin:0 0 8px">
+        <span class="type-badge {{ 'club' if community.kind == 'club' }}">{{ community.kind }}</span>
+        {% if community.visibility == 'private' %}<span class="type-badge private">private</span>{% endif %}
+        {% if role %}<span class="tag violet">you are {{ role }}</span>{% endif %}
+      </div>
+      <h1>{{ community.name }}</h1>
+      <span class="handle">Owned by {{ community.owner }} · created {{ community.created_at|timeago }} · {{ members|length }} members</span>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      {% if role in ['member', 'organiser', 'owner'] %}
+        {% if role != 'owner' %}
+        <form method="post" action="{{ url_for('leave_community', community_id=community.community_id) }}">
+          <input type="hidden" name="next" value="{{ here }}">
+          <button class="btn btn-ghost btn-sm" type="submit">Leave</button>
+        </form>
+        {% endif %}
+      {% elif role == 'pending' %}
+        <span class="tag pink">request pending</span>
+      {% else %}
+        <form method="post" action="{{ url_for('join_community', community_id=community.community_id) }}">
+          <input type="hidden" name="next" value="{{ here }}">
+          <button class="btn btn-primary btn-sm" type="submit">{{ 'Request to join' if community.visibility == 'private' and community.kind == 'group' else 'Join' }}</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if role in ['owner', 'organiser'] or me_user.role == 'admin' %}
+  <div class="tool-result" style="margin-top:16px">
+    <strong class="small">Owner tools</strong>
+    <div class="chip-row" style="margin-top:8px">
+      <span class="tag">{{ pending|length }} pending</span>
+      <span class="tag">{{ members|length }} members</span>
+      {% if community.kind == 'club' %}<span class="tag lime">clubs are run by organisers</span>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</section>
+
+<div class="split">
+  <section>
+    {% if role in ['member', 'organiser', 'owner'] %}
+    <section class="card composer spotlight" style="margin-bottom:16px">
+      <form method="post" action="{{ url_for('post_community', community_id=community.community_id) }}" enctype="multipart/form-data">
+        <input type="hidden" name="next" value="{{ here }}">
+        <textarea name="text" data-autosize placeholder="Post to {{ community.name }}…"></textarea>
+        <div class="composer-foot">
+          <label class="file-chip"><i data-lucide="image-plus"></i> Add media<input type="file" name="media" accept="image/*,video/*" multiple></label>
+          <span class="tag">members only</span>
+          <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="send"></i> Post</button>
+        </div>
+      </form>
+    </section>
+    {% endif %}
+
+    {% if feed_error %}
+    <div class="empty">
+      <strong>{{ feed_error }}</strong>
+      {% if role == 'pending' %}Your request is waiting for an owner to approve it.{% else %}Join this community to read and post.{% endif %}
+    </div>
+    {% elif items %}
+      {% for item in items %}{% include "_post.html" %}{% endfor %}
+    {% elif role in ['member', 'organiser', 'owner'] %}
+    <div class="empty"><strong>No posts here yet.</strong> Start the conversation above.</div>
+    {% else %}
+    <div class="empty"><strong>This feed is quiet.</strong> Members will see posts from this community here.</div>
+    {% endif %}
+  </section>
+
+  <aside style="display:flex; flex-direction:column; gap:14px">
+    {% if role in ['owner', 'organiser'] or me_user.role == 'admin' %}
+    <section class="card glass reveal">
+      <div class="card-head"><h3>Join requests</h3><span class="tag">{{ pending|length }}</span></div>
+      {% if pending %}
+      <div class="list">
+        {% for name in pending %}
+        <div class="row-card">
+          <span class="avatar avatar-sm">{{ name|initials }}</span>
+          <div class="meta"><strong>{{ name }}</strong><small>wants in</small></div>
+          <form method="post" action="{{ url_for('approve_join', community_id=community.community_id, username=name) }}">
+            <input type="hidden" name="next" value="{{ here }}">
+            <button class="icon-btn sm" type="submit" title="Approve"><i data-lucide="check"></i></button>
+          </form>
+          <form method="post" action="{{ url_for('reject_join', community_id=community.community_id, username=name) }}">
+            <input type="hidden" name="next" value="{{ here }}">
+            <button class="icon-btn sm" type="submit" title="Reject"><i data-lucide="x"></i></button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="muted small">No pending requests.</p>
+      {% endif %}
+    </section>
+
+    {% if community.kind == 'club' and me_user.role == 'admin' %}
+    <section class="card glass reveal">
+      <div class="card-head"><h3>Add organiser</h3></div>
+      <form method="post" action="{{ url_for('assign_organiser', community_id=community.community_id) }}" class="inline-form">
+        <input type="hidden" name="next" value="{{ here }}">
+        <input class="input" name="username" placeholder="username" required>
+        <button class="btn btn-ghost btn-sm" type="submit"><i data-lucide="user-cog"></i></button>
+      </form>
+    </section>
+    {% endif %}
+    {% endif %}
+
+    <section class="card glass reveal">
+      <div class="card-head"><h3>Members</h3><span class="tag">{{ members|length }}</span></div>
+      {% if members %}
+      <div class="mini-list">
+        {% for name in members[:18] %}
+        <a class="mini-row" href="{{ url_for('profile', username=name) }}">
+          <span class="avatar avatar-xs">{{ name|initials }}</span>
+          <div class="mini-meta">
+            <strong>{{ name }}</strong>
+            <small>{{ 'owner' if name == community.owner else ('organiser' if name in organisers else 'member') }}</small>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="muted small">No members yet.</p>
+      {% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

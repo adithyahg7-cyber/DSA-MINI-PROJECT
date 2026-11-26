@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Sign in' if mode == 'login' else 'Create account' }} — CU-Kizuna{% endblock %}
+{% block bodyclass %}public{% endblock %}
+{% block body %}
+<div class="auth-wrap">
+  <aside class="auth-side">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="brand-mark">K</span>
+      <span class="brand-word">CU-Kizuna</span>
+    </a>
+    <div>
+      <span class="eyebrow">CU-Kizuna network</span>
+      <h2>The CU-Kizuna graph,<br><span class="gradient-text">made visible.</span></h2>
+      <p>Connections, feeds, events and communities in one place — with every recommendation computed by a real algorithm.</p>
+      <div class="auth-points">
+        <span class="auth-point"><i data-lucide="git-branch"></i> Shortest chains and degrees from BFS</span>
+        <span class="auth-point"><i data-lucide="users"></i> People-you-may-know ranked by Jaccard overlap</span>
+        <span class="auth-point"><i data-lucide="layers"></i> Connection feed merged with a max-heap</span>
+        <span class="auth-point"><i data-lucide="search"></i> Instant prefix search from a trie</span>
+      </div>
+    </div>
+    <small>Built with Python, SQLite and Flask.</small>
+  </aside>
+
+  <main class="auth-main">
+    <div class="card glass auth-card reveal">
+      <div class="auth-tabs">
+        <a class="{{ 'active' if mode == 'login' }}" href="{{ url_for('login') }}">Sign in</a>
+        <a class="{{ 'active' if mode == 'signup' }}" href="{{ url_for('signup') }}">Create account</a>
+      </div>
+
+      {% if mode == 'login' %}
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to see what your connections have been up to.</p>
+      <form method="post" action="{{ url_for('login', next=request.args.get('next')) if request.args.get('next') else url_for('login') }}">
+        <label class="field"><span>Username</span>
+          <input class="input" name="username" autocomplete="username" required autofocus>
+        </label>
+        <label class="field"><span>Password</span>
+          <input class="input" type="password" name="password" autocomplete="current-password" required>
+        </label>
+        <button class="btn btn-primary btn-block" type="submit">Sign in <i data-lucide="arrow-right"></i></button>
+      </form>
+      <p class="auth-foot">Demo student: <strong>ananya</strong> / <strong>campus123</strong><br>Demo admin: <strong>admin</strong> / <strong>admin123</strong></p>
+      {% else %}
+      <h1>Create your account</h1>
+      <p class="sub">A username, a name, a password. That is all it takes.</p>
+      <form method="post" action="{{ url_for('signup') }}">
+        <label class="field"><span>Username</span>
+          <input class="input" name="username" placeholder="e.g. ananya" autocomplete="username" required autofocus>
+        </label>
+        <label class="field"><span>Full name</span>
+          <input class="input" name="name" placeholder="Ananya Rao" autocomplete="name" required>
+        </label>
+        <label class="field"><span>Password</span>
+          <input class="input" type="password" name="password" autocomplete="new-password" required>
+        </label>
+        <button class="btn btn-primary btn-block" type="submit">Create account <i data-lucide="sparkles"></i></button>
+      </form>
+      <p class="auth-foot">By joining you agree to keep it kind. Roles are assigned by admins.</p>
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}

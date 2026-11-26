@@ -1,0 +1,43 @@
+{% extends "shell.html" %}
+{% block title %}Notifications — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Alerts</span>
+    <h1>Notifications.</h1>
+    <p>Requests, likes, comments, roles and moderation decisions.</p>
+  </div>
+  <form method="post" action="{{ url_for('mark_read') }}">
+    <input type="hidden" name="next" value="{{ here }}">
+    <button class="btn btn-ghost btn-sm" type="submit"><i data-lucide="check-check"></i> Mark all read</button>
+  </form>
+</div>
+
+<div class="tabs">
+  <a class="tab {{ 'active' if not unread_only }}" href="{{ url_for('notifications') }}">All</a>
+  <a class="tab {{ 'active' if unread_only }}" href="{{ url_for('notifications', unread=1) }}">Unread {% if unread_count %}({{ unread_count }}){% endif %}</a>
+</div>
+
+<section class="card glass reveal" style="padding:0; overflow:hidden">
+  {% if notes %}
+    {% for note in notes %}
+    <div class="note {{ 'unread' if not note.is_read }}">
+      <span class="avatar avatar-sm"><i data-lucide="{{ 'bell-ring' if not note.is_read else 'bell' }}"></i></span>
+      <div class="meta">
+        <p>{{ note.text }}</p>
+        <small>{{ note.created_at|timeago }}</small>
+      </div>
+      {% if not note.is_read %}
+      <form method="post" action="{{ url_for('mark_read') }}">
+        <input type="hidden" name="next" value="{{ here }}">
+        <input type="hidden" name="notification_id" value="{{ note.notification_id }}">
+        <button class="icon-btn sm" type="submit" title="Mark read"><i data-lucide="check"></i></button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty" style="border:0"><strong>You are all caught up.</strong> New activity will land here.</div>
+  {% endif %}
+</section>
+{% endblock %}

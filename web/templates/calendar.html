@@ -1,0 +1,65 @@
+{% extends "shell.html" %}
+{% block title %}Calendar — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Calendar</span>
+    <h1>{{ month_name }} {{ year }}.</h1>
+    <p>A month view of every CU-Kizuna event, with the day's details below.</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-ghost" href="{{ url_for('events') }}"><i data-lucide="calendar-days"></i> Event list</a>
+  </div>
+</div>
+
+<div class="calendar-toolbar">
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('calendar', year=previous_month[0], month=previous_month[1]) }}"><i data-lucide="chevron-left"></i> Previous</a>
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('calendar') }}">This month</a>
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('calendar', year=next_month[0], month=next_month[1]) }}">Next <i data-lucide="chevron-right"></i></a>
+</div>
+
+<section class="card glass reveal" style="margin-bottom:18px">
+  <div class="calendar-grid">
+    {% for day_name in weekdays %}<div class="calendar-dow">{{ day_name[:3] }}</div>{% endfor %}
+    {% for week in weeks %}
+      {% for day in week %}
+        {% if day == 0 %}
+        <div class="calendar-cell muted"></div>
+        {% else %}
+        <div class="calendar-cell {{ 'today' if today.year == year and today.month == month and today.day == day else '' }}">
+          <a class="day {{ 'strong' if selected_day == day else '' }}" href="{{ url_for('calendar', year=year, month=month, day=day) }}">{{ day }}</a>
+          {% set day_events = by_day.get(day, []) %}
+          {% for event in day_events[:3] %}
+          <a class="calendar-event" href="{{ url_for('event_detail', event_id=event.event_id) }}" title="{{ event.title }}">{{ event.time }} · {{ event.title }}</a>
+          {% endfor %}
+          {% if day_events|length > 3 %}<span class="calendar-more">+{{ day_events|length - 3 }} more</span>{% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card glass reveal">
+  <div class="card-head">
+    <h3>{{ 'Event details · ' ~ month_name ~ ' ' ~ selected_day if selected_day else 'Event details' }}</h3>
+    <span class="tag">{{ selected_events|length }} events</span>
+  </div>
+  {% if selected_events %}
+  <div class="list">
+    {% for event in selected_events %}
+    <div class="row-card">
+      <span class="date-chip"><strong>{{ event.date[8:10] }}</strong><small>{{ event.date[5:7] }}</small></span>
+      <div class="meta">
+        <strong>{{ event.title }}</strong>
+        <small>{{ event.time }} · {{ event.venue }} · organised by {{ event.organiser }}</small>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('event_detail', event_id=event.event_id) }}">Open</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted">{{ 'Nothing scheduled on this day.' if selected_day else 'Pick a day in the month view to see its events.' }}</p>
+  {% endif %}
+</section>
+{% endblock %}

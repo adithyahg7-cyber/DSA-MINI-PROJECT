@@ -1,0 +1,90 @@
+{% extends "shell.html" %}
+{% block title %}Messages — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Direct messages</span>
+    <h1>Keep it close.</h1>
+    <p>One-to-one conversations with the people you are connected to.</p>
+  </div>
+</div>
+
+<div class="message-layout">
+  <section class="card glass reveal">
+    <div class="card-head"><h3>Conversations</h3><span class="tag">{{ threads|length }}</span></div>
+    {% if threads %}
+    <div class="thread-list">
+      {% for item in threads %}
+      <a class="thread-link {{ 'active' if peer and peer.username == item.user.username }}" href="{{ url_for('conversation', username=item.user.username) }}">
+        {% if item.user.avatar %}
+        <img class="avatar avatar-sm" src="{{ url_for('uploaded', filename=item.user.avatar) }}" alt="">
+        {% else %}
+        <span class="avatar avatar-sm">{{ item.user.name|initials }}</span>
+        {% endif %}
+        <span class="meta">
+          <strong>{{ item.user.name }}</strong>
+          <small>{{ 'You: ' if item.last.sender == me else '' }}{{ item.last.text }}</small>
+        </span>
+        {% if item.unread %}<span class="nav-badge">{{ item.unread }}</span>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted small">No conversations yet. Start one below.</p>
+    {% endif %}
+
+    {% set existing = threads|map(attribute='user.username')|list %}
+    {% set fresh = [] %}
+    {% for person in people if person.username not in existing %}{% set _ = fresh.append(person) %}{% endfor %}
+    {% if fresh %}
+    <div class="card-head" style="margin-top:18px"><h3>Start a chat</h3></div>
+    <div class="thread-list">
+      {% for person in fresh %}
+      <a class="thread-link" href="{{ url_for('conversation', username=person.username) }}">
+        {% if person.avatar %}<img class="avatar avatar-sm" src="{{ url_for('uploaded', filename=person.avatar) }}" alt="">
+        {% else %}<span class="avatar avatar-sm">{{ person.name|initials }}</span>{% endif %}
+        <span class="meta"><strong>{{ person.name }}</strong><small>@{{ person.username }}</small></span>
+        <i data-lucide="chevron-right"></i>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="card glass reveal">
+    {% if peer %}
+    <div class="card-head">
+      <div style="display:flex;align-items:center;gap:10px">
+        {% if peer.avatar %}<img class="avatar avatar-sm" src="{{ url_for('uploaded', filename=peer.avatar) }}" alt="">
+        {% else %}<span class="avatar avatar-sm">{{ peer.name|initials }}</span>{% endif %}
+        <div><h3>{{ peer.name }}</h3><span class="muted small">@{{ peer.username }}</span></div>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('profile', username=peer.username) }}">Profile</a>
+    </div>
+
+    <div class="thread">
+      {% if thread %}
+        {% for message in thread %}
+        <div class="bubble {{ 'mine' if message.sender == me else '' }}">
+          {{ message.text }}
+          <small>{{ message.created_at|timeago }}</small>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty"><strong>Say hello.</strong> Messages appear here as soon as you send one.</div>
+      {% endif %}
+    </div>
+
+    <form method="post" action="{{ url_for('send_message', username=peer.username) }}" class="message-form">
+      <input class="input" name="text" placeholder="Message {{ peer.name.split()[0] }}…" autocomplete="off" required>
+      <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="send"></i> Send</button>
+    </form>
+    {% else %}
+    <div class="empty" style="min-height:420px">
+      <strong>Pick a conversation.</strong>
+      Select someone from the list, or start a new chat with a connection.
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

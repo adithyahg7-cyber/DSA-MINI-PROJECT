@@ -1,0 +1,170 @@
+{% extends "shell.html" %}
+{% block title %}Admin — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Control room</span>
+    <h1>Admin.</h1>
+    <p>Roles, reports and event pitches. Every action here is enforced by the engine, not this page.</p>
+  </div>
+  <div class="actions">
+    <span class="tag violet">{{ stats.users }} users</span>
+    <span class="tag cyan">{{ stats.posts }} posts</span>
+    <span class="tag lime">{{ stats.connections }} edges</span>
+  </div>
+</div>
+
+<section class="card glass reveal" style="margin-bottom:18px">
+  <div class="card-head"><h3>Graph tools</h3><span class="tag">admin only</span></div>
+  <p class="muted small">BFS distance, shortest chain and mutual connections stay behind the control room.</p>
+  <form method="get" action="{{ url_for('admin') }}" class="inline-form" style="margin-top:12px">
+    <input class="input" name="target" value="{{ graph_target }}" placeholder="Username to measure…" autocomplete="off">
+    <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="git-branch"></i> Measure</button>
+  </form>
+  {% if graph_tool %}
+  <div class="tool-result">
+    <div class="breadcrumb">
+      <b>you</b>
+      {% if graph_tool.chain %}
+        {% for step in graph_tool.chain[1:] %}<span>→</span><b>{{ step }}</b>{% endfor %}
+      {% else %}
+        <span>no chain within 3 hops</span>
+      {% endif %}
+    </div>
+    <div class="chip-row" style="margin-top:12px">
+      <span class="tag cyan">degree {{ graph_tool.degree }}</span>
+      <span class="tag violet">length {{ graph_tool.chain|length if graph_tool.chain else 0 }}</span>
+      <span class="tag lime">{{ graph_tool.mutual|length }} mutual</span>
+    </div>
+    {% if graph_tool.mutual %}<p class="muted small" style="margin-top:8px">Mutual: {{ graph_tool.mutual|join(', ') }}</p>{% endif %}
+  </div>
+  {% elif graph_target %}
+  <p class="muted small" style="margin-top:10px">No user called “{{ graph_target }}”.</p>
+  {% endif %}
+</section>
+
+<div class="split">
+  <section style="display:flex; flex-direction:column; gap:14px">
+    <section class="card glass reveal">
+      <div class="card-head"><h3>Moderation queue</h3><span class="tag">{{ queue|length }}</span></div>
+      {% if queue %}
+        {% for item in queue %}
+        <article class="queue-item">
+          <div class="chip-row" style="margin:0 0 8px">
+            <span class="tag pink">report #{{ item.report.report_id }}</span>
+            <span class="tag">by {{ item.report.reporter }}</span>
+            <span class="tag">{{ item.report.created_at|timeago }}</span>
+          </div>
+          <p class="small"><strong>Reason:</strong> {{ item.report.reason }}</p>
+          {% if item.post %}
+          <p class="muted small" style="margin-top:6px">
+            Post by <a href="{{ url_for('profile', username=item.post.author) }}">@{{ item.post.author }}</a>:
+            {{ item.post.text[:180] }}{% if item.post.text|length > 180 %}…{% endif %}
+          </p>
+          {% else %}
+          <p class="muted small" style="margin-top:6px">The post no longer exists.</p>
+          {% endif %}
+          <div class="foot">
+            <form method="post" action="{{ url_for('review_report', report_id=item.report.report_id) }}">
+              <input type="hidden" name="next" value="{{ here }}">
+              <input type="hidden" name="action" value="dismiss">
+              <button class="btn btn-ghost btn-sm" type="submit">Dismiss</button>
+            </form>
+            <form method="post" action="{{ url_for('review_report', report_id=item.report.report_id) }}" onsubmit="return confirm('Remove this post?')">
+              <input type="hidden" name="next" value="{{ here }}">
+              <input type="hidden" name="action" value="remove">
+              <button class="btn btn-danger btn-sm" type="submit"><i data-lucide="trash-2"></i> Remove post</button>
+            </form>
+          </div>
+        </article>
+        {% endfor %}
+      {% else %}
+        <p class="muted">No pending reports. The network is behaving.</p>
+      {% endif %}
+    </section>
+
+    <section class="card glass reveal">
+      <div class="card-head"><h3>Event pitches</h3><span class="tag">{{ pitches|length }}</span></div>
+      {% if pitches %}
+        {% for pitch in pitches %}
+        <article class="queue-item">
+          <div class="chip-row" style="margin:0 0 8px">
+            <span class="tag {{ 'lime' if pitch.status == 'approved' else ('pink' if pitch.status == 'rejected' else 'violet') }}">{{ pitch.status }}</span>
+            <span class="tag">by {{ pitch.proposer }}</span>
+            <span class="tag">{{ pitch.created_at|timeago }}</span>
+          </div>
+          <p class="small"><strong>{{ pitch.title }}</strong></p>
+          <p class="muted small" style="margin-top:4px">{{ pitch.description }}</p>
+          {% if pitch.status == 'pending' %}
+          <div class="foot">
+            <form method="post" action="{{ url_for('review_pitch', pitch_id=pitch.pitch_id) }}">
+              <input type="hidden" name="next" value="{{ here }}">
+              <input type="hidden" name="action" value="approve">
+              <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="check"></i> Approve</button>
+            </form>
+            <form method="post" action="{{ url_for('review_pitch', pitch_id=pitch.pitch_id) }}">
+              <input type="hidden" name="next" value="{{ here }}">
+              <input type="hidden" name="action" value="reject">
+              <button class="btn btn-ghost btn-sm" type="submit"><i data-lucide="x"></i> Reject</button>
+            </form>
+          </div>
+          {% endif %}
+        </article>
+        {% endfor %}
+      {% else %}
+        <p class="muted">No pitches yet.</p>
+      {% endif %}
+    </section>
+  </section>
+
+  <aside style="display:flex; flex-direction:column; gap:14px">
+    <section class="card glass reveal">
+      <div class="card-head"><h3>Users & roles</h3></div>
+      <table class="table">
+        <thead><tr><th>User</th><th>Role</th></tr></thead>
+        <tbody>
+          {% for person in users %}
+          <tr>
+            <td>
+              <a href="{{ url_for('profile', username=person.username) }}"><strong>{{ person.name }}</strong></a>
+              <div class="muted small">@{{ person.username }}</div>
+            </td>
+            <td>
+              <form method="post" action="{{ url_for('set_role') }}" class="inline-form">
+                <input type="hidden" name="next" value="{{ here }}">
+                <input type="hidden" name="username" value="{{ person.username }}">
+                <select class="select" name="role" style="padding:6px 8px; font-size:12px">
+                  {% for option in ['student', 'organiser', 'admin'] %}
+                  <option value="{{ option }}" {{ 'selected' if person.role == option }}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+                <button class="icon-btn sm" type="submit" title="Save role"><i data-lucide="check"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card glass reveal">
+      <div class="card-head"><h3>Role log</h3><span class="tag">{{ role_log|length }}</span></div>
+      {% if role_log %}
+      <div class="list">
+        {% for entry in role_log|reverse %}
+        <div class="row-card">
+          <span class="avatar avatar-xs">{{ entry.target|initials }}</span>
+          <div class="meta">
+            <strong>{{ entry.target }}: {{ entry.old_role }} → {{ entry.new_role }}</strong>
+            <small>by {{ entry.actor }} · {{ entry.created_at|timeago }}</small>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="muted small">No role changes yet.</p>
+      {% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

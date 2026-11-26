@@ -1,0 +1,108 @@
+{% extends "shell.html" %}
+{% block title %}Network — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">People</span>
+    <h1>Your network, mapped.</h1>
+    <p>Requests, suggestions and the people you have connected with.</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-ghost" href="{{ url_for('search') }}"><i data-lucide="user-search"></i> Search people</a>
+  </div>
+</div>
+
+<div class="grid-2">
+  <section class="card glass reveal">
+    <div class="card-head"><h3>Incoming requests</h3><span class="tag">{{ incoming|length }}</span></div>
+    {% if incoming %}
+    <div class="list">
+      {% for name, ts in incoming %}
+      <div class="row-card">
+        <span class="avatar avatar-sm">{{ name|initials }}</span>
+        <div class="meta"><strong>{{ name }}</strong><small>wants to connect</small></div>
+        <form method="post" action="{{ url_for('accept_request', username=name) }}">
+          <input type="hidden" name="next" value="{{ here }}">
+          <button class="icon-btn sm" type="submit" title="Accept"><i data-lucide="check"></i></button>
+        </form>
+        <form method="post" action="{{ url_for('reject_request', username=name) }}">
+          <input type="hidden" name="next" value="{{ here }}">
+          <button class="icon-btn sm" type="submit" title="Reject"><i data-lucide="x"></i></button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted">No incoming requests.</p>
+    {% endif %}
+  </section>
+
+  <section class="card glass reveal">
+    <div class="card-head"><h3>Sent requests</h3><span class="tag">{{ outgoing|length }}</span></div>
+    {% if outgoing %}
+    <div class="list">
+      {% for name, ts in outgoing %}
+      <div class="row-card">
+        <span class="avatar avatar-sm">{{ name|initials }}</span>
+        <div class="meta"><strong>{{ name }}</strong><small>waiting for a reply</small></div>
+        <form method="post" action="{{ url_for('cancel_request', username=name) }}">
+          <input type="hidden" name="next" value="{{ here }}">
+          <button class="btn btn-ghost btn-sm" type="submit">Cancel</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted">No pending requests sent.</p>
+    {% endif %}
+  </section>
+</div>
+
+<section style="margin-top:22px">
+  <div class="card-head"><h3>People you may know</h3><span class="tag">Jaccard ranked</span></div>
+  {% if suggestions %}
+  <div class="grid-2">
+    {% for item in suggestions %}
+    <article class="card person-card reveal">
+      <span class="avatar">{{ item.user.name|initials }}</span>
+      <div class="meta">
+        <a href="{{ url_for('profile', username=item.user.username) }}">{{ item.user.name }}</a>
+        <small>@{{ item.user.username }} · {{ (item.score * 100)|round|int }}% overlap</small>
+      </div>
+      <div class="actions">
+        <form method="post" action="{{ url_for('send_request', username=item.user.username) }}">
+          <input type="hidden" name="next" value="{{ here }}">
+          <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="user-plus"></i> Connect</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty"><strong>No suggestions yet.</strong> Connect with a couple of people and second-degree candidates will appear here.</div>
+  {% endif %}
+</section>
+
+<section style="margin-top:22px">
+  <div class="card-head"><h3>Your connections</h3><span class="tag">{{ connections|length }}</span></div>
+  {% if connections %}
+  <div class="grid-3">
+    {% for person in connections %}
+    <article class="card person-card reveal">
+      <span class="avatar avatar-sm">{{ person.name|initials }}</span>
+      <div class="meta">
+        <a href="{{ url_for('profile', username=person.username) }}">{{ person.name }}</a>
+        <small>@{{ person.username }}</small>
+      </div>
+      <form method="post" action="{{ url_for('remove_connection', username=person.username) }}">
+        <input type="hidden" name="next" value="{{ here }}">
+        <button class="icon-btn sm" type="submit" title="Remove"><i data-lucide="user-minus"></i></button>
+      </form>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty"><strong>You are not connected to anyone yet.</strong> Send a request above or search for people.</div>
+  {% endif %}
+</section>
+{% endblock %}

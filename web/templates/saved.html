@@ -1,0 +1,18 @@
+{% extends "shell.html" %}
+{% block title %}Saved posts — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Bookmarks</span>
+    <h1>Saved for later.</h1>
+    <p>Read newest-saved first. Deleted posts disappear automatically.</p>
+  </div>
+  <a class="btn btn-ghost" href="{{ url_for('feed') }}"><i data-lucide="home"></i> Back to feed</a>
+</div>
+
+{% if items %}
+  {% for item in items %}{% include "_post.html" %}{% endfor %}
+{% else %}
+  <div class="empty"><strong>No saved posts yet.</strong> Tap the bookmark on any post and it will wait here.</div>
+{% endif %}
+{% endblock %}

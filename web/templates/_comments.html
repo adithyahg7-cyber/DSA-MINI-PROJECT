@@ -1,0 +1,35 @@
+{% macro render(nodes, post_id) %}
+{% if nodes %}
+<ul class="comment-list">
+  {% for node in nodes %}
+  <li class="comment">
+    <div class="comment-head">
+      <span class="avatar avatar-xs">{{ node.comment.author|initials }}</span>
+      <a href="{{ url_for('profile', username=node.comment.author) }}">{{ node.comment.author }}</a>
+      <small>{{ node.comment.created_at|timeago }}</small>
+      <details class="menu comment-tools">
+        <summary class="icon-btn sm" title="Comment options"><i data-lucide="more-vertical"></i></summary>
+        <div class="menu-panel">
+          <form method="post" action="{{ url_for('delete_comment', post_id=post_id, comment_id=node.comment.comment_id) }}" data-ajax="delete-comment" onsubmit="return confirm('Delete this comment?')">
+            <input type="hidden" name="next" value="{{ here }}">
+            <button class="btn btn-ghost btn-sm" type="submit"><i data-lucide="trash-2"></i> Delete</button>
+          </form>
+        </div>
+      </details>
+    </div>
+    <p class="comment-text">{{ node.comment.text }}</p>
+    <details class="reply-box">
+      <summary>Reply</summary>
+      <form method="post" action="{{ url_for('comment_post', post_id=post_id) }}" class="inline-form" data-ajax="comment">
+        <input type="hidden" name="parent_id" value="{{ node.comment.comment_id }}">
+        <input type="hidden" name="next" value="{{ here }}">
+        <input class="input" name="text" placeholder="Write a reply…" required>
+        <button class="btn btn-ghost btn-sm" type="submit">Send</button>
+      </form>
+    </details>
+    {% if node.replies %}{{ render(node.replies, post_id) }}{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endmacro %}

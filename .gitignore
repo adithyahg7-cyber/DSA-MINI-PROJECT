@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.sqlite3
+campus.db
+campus.db-wal
+campus.db-shm
+.campus_secret
+.opencode/
+uploads/
+.venv/
+venv/
+.env
+.pytest_cache/
+.DS_Store
+Thumbs.db

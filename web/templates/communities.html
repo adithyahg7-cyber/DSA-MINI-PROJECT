@@ -1,0 +1,66 @@
+{% extends "shell.html" %}
+{% block title %}Communities — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Communities</span>
+    <h1>Find your corner.</h1>
+    <p>Clubs are run by organisers. Groups are open or private — private ones need an owner's approval.</p>
+  </div>
+</div>
+
+<section class="card glass reveal" style="margin-bottom:20px">
+  <div class="card-head"><h3>Create a community</h3></div>
+  <form method="post" action="{{ url_for('create_community') }}" class="inline-form" style="flex-wrap:wrap">
+    <input type="hidden" name="next" value="{{ here }}">
+    <select class="select" name="kind" style="max-width:150px">
+      <option value="group">Group</option>
+      {% if me_user.role == 'admin' %}<option value="club">Club</option>{% endif %}
+    </select>
+    <input class="input" name="name" placeholder="Community name" required style="flex:1; min-width:200px">
+    <select class="select" name="visibility" style="max-width:150px">
+      <option value="public">Public</option>
+      <option value="private">Private</option>
+    </select>
+    <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="plus"></i> Create</button>
+  </form>
+</section>
+
+{% if items %}
+<div class="community-grid stagger">
+  {% for item in items %}
+  {% set community = item.community %}
+  <article class="card community-card spotlight reveal">
+    <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start">
+      <div>
+        <div class="chip-row" style="margin:0 0 8px">
+          <span class="type-badge {{ 'club' if community.kind == 'club' }}">{{ community.kind }}</span>
+          {% if community.visibility == 'private' %}<span class="type-badge private">private</span>{% endif %}
+        </div>
+        <h3>{{ community.name }}</h3>
+      </div>
+      {% if item.joined %}<span class="tag lime">joined</span>{% elif item.pending %}<span class="tag pink">pending</span>{% endif %}
+    </div>
+    <p class="muted small">Owned by {{ community.owner }} · {{ community.created_at|timeago }}</p>
+    <div class="foot">
+      <span class="tag">{{ 'club' if community.kind == 'club' else community.visibility + ' group' }}</span>
+      <div style="display:flex; gap:6px">
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('community_detail', community_id=community.community_id) }}">Open</a>
+        {% if item.joined %}
+        <form method="post" action="{{ url_for('leave_community', community_id=community.community_id) }}">
+          <button class="btn btn-ghost btn-sm" type="submit">Leave</button>
+        </form>
+        {% elif not item.pending %}
+        <form method="post" action="{{ url_for('join_community', community_id=community.community_id) }}">
+          <button class="btn btn-primary btn-sm" type="submit">{{ 'Request' if community.visibility == 'private' and community.kind == 'group' else 'Join' }}</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty"><strong>No communities yet.</strong> Create the first group above.</div>
+{% endif %}
+{% endblock %}

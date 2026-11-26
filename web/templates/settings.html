@@ -1,0 +1,84 @@
+{% extends "shell.html" %}
+{% block title %}Settings — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Account</span>
+    <h1>Settings.</h1>
+    <p>Your profile, your handle, your password. Changes are saved straight to SQLite.</p>
+  </div>
+  <a class="btn btn-ghost" href="{{ url_for('profile', username=me) }}"><i data-lucide="user-round"></i> View profile</a>
+</div>
+
+<div class="grid-2">
+  <section class="card glass reveal">
+    <div class="card-head"><h3>Profile</h3></div>
+    <form method="post" action="{{ url_for('settings') }}">
+      <input type="hidden" name="kind" value="profile">
+      <input type="hidden" name="next" value="{{ here }}">
+      <label class="field"><span>Full name</span>
+        <input class="input" name="name" value="{{ me_user.name }}" required>
+      </label>
+      <label class="field"><span>Bio</span>
+        <textarea class="textarea" name="bio" placeholder="What are you into?">{{ me_user.bio }}</textarea>
+      </label>
+      <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="save"></i> Save profile</button>
+    </form>
+  </section>
+
+  <section class="card glass reveal">
+    <div class="card-head"><h3>Profile photo</h3></div>
+    <div class="avatar-upload">
+      {% if me_user.avatar %}
+      <img class="avatar avatar-lg" src="{{ url_for('uploaded', filename=me_user.avatar) }}" alt="Your profile photo">
+      {% else %}
+      <span class="avatar avatar-lg">{{ me_user.name|initials }}</span>
+      {% endif %}
+      <div>
+        <strong class="small">Make your face familiar.</strong>
+        <p class="muted small" style="margin-top:4px">Images and GIFs up to 32 MB. Your photo appears beside posts and messages.</p>
+      </div>
+    </div>
+    <form method="post" action="{{ url_for('upload_avatar') }}" enctype="multipart/form-data" class="inline-form">
+      <label class="file-chip"><i data-lucide="image-plus"></i> Choose photo<input type="file" name="avatar" accept="image/*" required></label>
+      <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="upload"></i> Upload</button>
+    </form>
+  </section>
+
+  <section class="card glass reveal">
+    <div class="card-head"><h3>Username</h3></div>
+    <p class="muted small" style="margin-bottom:12px">Renaming updates your graph edges, posts, trie entry and every stored reference.</p>
+    <form method="post" action="{{ url_for('settings') }}">
+      <input type="hidden" name="kind" value="username">
+      <input type="hidden" name="next" value="{{ here }}">
+      <label class="field"><span>New username</span>
+        <input class="input" name="new_username" placeholder="{{ me }}" required>
+      </label>
+      <button class="btn btn-ghost btn-sm" type="submit"><i data-lucide="at-sign"></i> Change username</button>
+    </form>
+  </section>
+
+  <section class="card glass reveal">
+    <div class="card-head"><h3>Password</h3></div>
+    <form method="post" action="{{ url_for('settings') }}">
+      <input type="hidden" name="kind" value="password">
+      <input type="hidden" name="next" value="{{ here }}">
+      <label class="field"><span>Current password</span>
+        <input class="input" type="password" name="old_password" required>
+      </label>
+      <label class="field"><span>New password</span>
+        <input class="input" type="password" name="new_password" required>
+      </label>
+      <button class="btn btn-ghost btn-sm" type="submit"><i data-lucide="key-round"></i> Change password</button>
+    </form>
+  </section>
+
+  <section class="card glass reveal">
+    <div class="card-head"><h3>Session</h3></div>
+    <p class="muted small" style="margin-bottom:12px">Signed in as <strong>@{{ me }}</strong> with the role <span class="tag">{{ me_user.role }}</span>.</p>
+    <form method="post" action="{{ url_for('logout') }}">
+      <button class="btn btn-danger btn-sm" type="submit"><i data-lucide="log-out"></i> Sign out</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

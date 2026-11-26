@@ -1,0 +1,43 @@
+{% extends "shell.html" %}
+{% block title %}Search — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Trie search</span>
+    <h1>Find people.</h1>
+    <p>Prefix search runs through the trie — type a few letters of a username or a name.</p>
+  </div>
+</div>
+
+<section class="card glass reveal" style="margin-bottom:20px">
+  <form method="get" action="{{ url_for('search') }}" class="inline-form">
+    <input class="input" name="q" value="{{ query }}" placeholder="Try “an”, “rao”, “pri”…" autofocus>
+    <button class="btn btn-primary" type="submit"><i data-lucide="search"></i> Search</button>
+  </form>
+</section>
+
+{% if query %}
+  <div class="card-head"><h3>Results for “{{ query }}”</h3><span class="tag">{{ results|length }}</span></div>
+  {% if results %}
+  <div class="grid-2">
+    {% for person in results %}
+    <article class="card person-card reveal">
+      <span class="avatar">{{ person.name|initials }}</span>
+      <div class="meta">
+        <a href="{{ url_for('profile', username=person.username) }}">{{ person.name }}</a>
+        <small>@{{ person.username }} · {{ person.role }}</small>
+      </div>
+      <form method="post" action="{{ url_for('send_request', username=person.username) }}">
+        <input type="hidden" name="next" value="{{ here }}">
+        <button class="btn btn-ghost btn-sm" type="submit"><i data-lucide="user-plus"></i> Connect</button>
+      </form>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty"><strong>No matches.</strong> The trie only knows usernames and words from full names.</div>
+  {% endif %}
+{% else %}
+  <div class="empty"><strong>Start typing above.</strong> Results appear as you extend the prefix.</div>
+{% endif %}
+{% endblock %}

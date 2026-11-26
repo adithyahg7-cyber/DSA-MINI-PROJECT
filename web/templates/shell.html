@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block bodyclass %}app{% endblock %}
+{% block body %}
+<div class="shell">
+  <aside class="rail" id="rail">
+    <a class="brand" href="{{ url_for('feed') }}">
+      <span class="brand-mark">K</span>
+      <span class="brand-word">CU-Kizuna</span>
+    </a>
+
+    <nav class="nav">
+      <a class="nav-item {{ 'active' if request.endpoint == 'feed' }}" href="{{ url_for('feed') }}">
+        <i data-lucide="home"></i><span>Feed</span>
+      </a>
+      <a class="nav-item {{ 'active' if request.endpoint == 'network' }}" href="{{ url_for('network') }}">
+        <i data-lucide="users"></i><span>Network</span>
+        {% if pending_count %}<span class="nav-badge">{{ pending_count }}</span>{% endif %}
+      </a>
+      <a class="nav-item {{ 'active' if request.endpoint in ['events', 'event_detail'] }}" href="{{ url_for('events') }}">
+        <i data-lucide="calendar-days"></i><span>Events</span>
+      </a>
+      <a class="nav-item {{ 'active' if request.endpoint == 'calendar' }}" href="{{ url_for('calendar') }}">
+        <i data-lucide="calendar-range"></i><span>Calendar</span>
+      </a>
+      <a class="nav-item {{ 'active' if request.endpoint in ['messages', 'conversation'] }}" href="{{ url_for('messages') }}">
+        <i data-lucide="message-square"></i><span>Messages</span>
+        {% if unread_messages %}<span class="nav-badge">{{ unread_messages }}</span>{% endif %}
+      </a>
+      <a class="nav-item {{ 'active' if request.endpoint in ['communities', 'community_detail'] }}" href="{{ url_for('communities') }}">
+        <i data-lucide="layers"></i><span>Communities</span>
+      </a>
+      <a class="nav-item {{ 'active' if request.endpoint == 'saved' }}" href="{{ url_for('saved') }}">
+        <i data-lucide="bookmark"></i><span>Saved</span>
+      </a>
+      <a class="nav-item {{ 'active' if request.endpoint == 'notifications' }}" href="{{ url_for('notifications') }}">
+        <i data-lucide="bell"></i><span>Alerts</span>
+        {% if unread_count %}<span class="nav-badge">{{ unread_count }}</span>{% endif %}
+      </a>
+      <a class="nav-item {{ 'active' if request.endpoint == 'profile' }}" href="{{ url_for('profile', username=me) }}">
+        <i data-lucide="user-round"></i><span>Profile</span>
+      </a>
+      {% if me_user.role == 'admin' %}
+      <a class="nav-item {{ 'active' if request.endpoint == 'admin' }}" href="{{ url_for('admin') }}">
+        <i data-lucide="shield-check"></i><span>Admin</span>
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="rail-foot">
+      <a class="nav-item" href="{{ url_for('settings') }}">
+        <i data-lucide="settings"></i><span>Settings</span>
+      </a>
+      <form method="post" action="{{ url_for('logout') }}">
+        <button class="nav-item as-button" type="submit">
+          <i data-lucide="log-out"></i><span>Sign out</span>
+        </button>
+      </form>
+      <div class="rail-user">
+        {% if me_user.avatar %}<img class="avatar avatar-sm" src="{{ url_for('uploaded', filename=me_user.avatar) }}" alt="">
+        {% else %}<span class="avatar avatar-sm">{{ me_user.name|initials }}</span>{% endif %}
+        <div>
+          <strong>{{ me_user.name }}</strong>
+          <small>@{{ me_user.username }} · {{ me_user.role }}</small>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <button class="icon-btn rail-toggle" id="rail-toggle" type="button" aria-label="Toggle navigation">
+        <i data-lucide="menu"></i>
+      </button>
+      <form class="search-box" method="get" action="{{ url_for('search') }}">
+        <i data-lucide="search"></i>
+        <input name="q" value="{{ request.args.get('q', '') if request.endpoint == 'search' else '' }}" placeholder="Search people, names, prefixes…" autocomplete="off">
+        <kbd>⌘K</kbd>
+      </form>
+      <div class="top-actions">
+        <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light and dark theme" title="Toggle theme">
+          <i data-lucide="moon"></i>
+        </button>
+        <a class="icon-btn" href="{{ url_for('notifications') }}" aria-label="Notifications">
+          <i data-lucide="bell"></i>
+          {% if unread_count %}<span class="dot"></span>{% endif %}
+        </a>
+        <a class="user-chip" href="{{ url_for('profile', username=me) }}">
+          {% if me_user.avatar %}<img class="avatar avatar-sm" src="{{ url_for('uploaded', filename=me_user.avatar) }}" alt="">
+          {% else %}<span class="avatar avatar-sm">{{ me_user.name|initials }}</span>{% endif %}
+          <span>{{ me_user.username }}</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="main">
+      {% block main %}{% endblock %}
+    </main>
+  </div>
+
+  <aside class="aside">
+    {% block aside %}
+    <section class="card glass aside-card">
+      <div class="card-head">
+        <h3>People you may know</h3>
+        <a href="{{ url_for('network') }}">All</a>
+      </div>
+      {% if sidebar_people %}
+        <div class="mini-list">
+          {% for item in sidebar_people %}
+          <div class="mini-row">
+            {% if item.user.avatar %}<img class="avatar avatar-xs" src="{{ url_for('uploaded', filename=item.user.avatar) }}" alt="">
+            {% else %}<span class="avatar avatar-xs">{{ item.user.name|initials }}</span>{% endif %}
+            <div class="mini-meta">
+              <a href="{{ url_for('profile', username=item.user.username) }}">{{ item.user.name }}</a>
+              <small>{{ (item.score * 100)|round|int }}% mutual</small>
+            </div>
+            <form method="post" action="{{ url_for('send_request', username=item.user.username) }}">
+              <input type="hidden" name="next" value="{{ here }}">
+              <button class="icon-btn sm" type="submit" title="Connect"><i data-lucide="user-plus"></i></button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">Connect with a few people and suggestions will appear here.</p>
+      {% endif %}
+    </section>
+
+    <section class="card glass aside-card">
+      <div class="card-head">
+        <h3>Upcoming</h3>
+        <a href="{{ url_for('events') }}">Calendar</a>
+      </div>
+      {% if sidebar_events %}
+        <div class="mini-list">
+          {% for event in sidebar_events %}
+          <a class="mini-row" href="{{ url_for('event_detail', event_id=event.event_id) }}">
+            <span class="date-chip"><strong>{{ event.date[8:10] }}</strong><small>{{ event.date[5:7] }}</small></span>
+            <div class="mini-meta">
+              <strong>{{ event.title }}</strong>
+              <small>{{ event.time }} · {{ event.venue }}</small>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">No events scheduled yet.</p>
+      {% endif %}
+    </section>
+
+    {% endblock %}
+  </aside>
+</div>
+{% endblock %}

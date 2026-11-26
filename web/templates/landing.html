@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}CU-Kizuna — your network, in motion{% endblock %}
+{% block bodyclass %}public{% endblock %}
+{% block body %}
+<header class="landing-nav reveal">
+  <a class="brand" href="{{ url_for('index') }}">
+    <span class="brand-mark">K</span>
+    <span class="brand-word">CU-Kizuna</span>
+  </a>
+  <nav class="links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#graph">The graph</a>
+  </nav>
+  <div class="cta">
+    <a class="btn btn-ghost" href="{{ url_for('login') }}">Sign in</a>
+    <a class="btn btn-primary magnetic" href="{{ url_for('signup') }}">Join CU-Kizuna</a>
+  </div>
+</header>
+
+<main class="public-main">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="hero-badge"><span class="pulse"></span> DSA mini project · pure Python engine</span>
+      <h1>CU-Kizuna,<br><span class="gradient-text">in motion.</span></h1>
+      <p class="hero-sub">
+        Find your people, follow the conversations that matter, and move through
+        events, clubs and communities — all powered by real graphs, heaps and tries
+        running on in-memory Python.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary magnetic" href="{{ url_for('signup') }}">
+          <i data-lucide="sparkles"></i> Create your account
+        </a>
+        <a class="btn btn-ghost" href="{{ url_for('login') }}">
+          <i data-lucide="log-in"></i> I already have one
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><strong class="count" data-target="{{ stats.users }}">0</strong><small>Students</small></div>
+        <div class="hero-stat"><strong class="count" data-target="{{ stats.connections }}">0</strong><small>Connections</small></div>
+        <div class="hero-stat"><strong class="count" data-target="{{ stats.posts }}">0</strong><small>Posts</small></div>
+        <div class="hero-stat"><strong class="count" data-target="{{ stats.events }}">0</strong><small>Events</small></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <span class="orb orb-1"></span>
+      <span class="orb orb-2"></span>
+      <div class="graph-card" id="graph">
+        <div class="mini-nav"><i></i><i></i><i></i></div>
+        <svg viewBox="0 0 420 360" role="img" aria-label="CU-Kizuna connection graph">
+          <defs>
+            <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#7c5cff" stop-opacity="0.85"/>
+              <stop offset="1" stop-color="#22d3ee" stop-opacity="0.35"/>
+            </linearGradient>
+            <radialGradient id="nodeFill">
+              <stop offset="0" stop-color="#a78bfa"/>
+              <stop offset="1" stop-color="#4c1d95"/>
+            </radialGradient>
+          </defs>
+          <g stroke="url(#edge)" stroke-width="1.2" opacity="0.65">
+            <line x1="210" y1="170" x2="110" y2="90"/>
+            <line x1="210" y1="170" x2="330" y2="100"/>
+            <line x1="210" y1="170" x2="90" y2="250"/>
+            <line x1="210" y1="170" x2="300" y2="270"/>
+            <line x1="110" y1="90" x2="330" y2="100"/>
+            <line x1="90" y1="250" x2="300" y2="270"/>
+            <line x1="110" y1="90" x2="90" y2="250"/>
+          </g>
+          <g fill="url(#nodeFill)" stroke="rgba(255,255,255,.35)">
+            <circle cx="210" cy="170" r="26"/>
+            <circle cx="110" cy="90" r="15"/>
+            <circle cx="330" cy="100" r="13"/>
+            <circle cx="90" cy="250" r="12"/>
+            <circle cx="300" cy="270" r="16"/>
+            <circle cx="210" cy="60" r="7" opacity=".8"/>
+            <circle cx="355" cy="200" r="8" opacity=".7"/>
+            <circle cx="150" cy="305" r="6" opacity=".6"/>
+          </g>
+          <g fill="#e9d5ff" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">
+            <text x="210" y="174">you</text>
+          </g>
+          <g class="node-label" text-anchor="middle">
+            <text x="110" y="70">ananya</text>
+            <text x="330" y="80">riya</text>
+            <text x="90" y="274">kabir</text>
+            <text x="300" y="298">meera</text>
+          </g>
+        </svg>
+      </div>
+      <span class="graph-pill p1"><i data-lucide="git-branch"></i> degree 2</span>
+      <span class="graph-pill p2"><i data-lucide="users"></i> 4 mutuals</span>
+      <span class="graph-pill p3"><i data-lucide="zap"></i> BFS · O(V+E)</span>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-head scroll-reveal">
+      <span class="eyebrow">Built for Chanakya University</span>
+      <h2>Everything a campus network needs, without the noise.</h2>
+      <p>Each feature maps to a data structure you can defend in the viva.</p>
+    </div>
+    <div class="bento stagger">
+      <article class="bento-card wide">
+        <span class="feature-icon"><i data-lucide="network"></i></span>
+        <h3>Graph intelligence</h3>
+        <p>Adjacency sets, BFS shortest chains up to three hops, mutual connections and Jaccard-ranked suggestions.</p>
+      </article>
+      <article class="bento-card wide">
+        <span class="feature-icon"><i data-lucide="layers"></i></span>
+        <h3>Two feeds, one engine</h3>
+        <p>A max-heap merges your connections' posts by time. Explore reads the global stream from the end.</p>
+      </article>
+      <article class="bento-card">
+        <span class="feature-icon"><i data-lucide="search"></i></span>
+        <h3>Trie search</h3>
+        <p>Prefix search that costs the prefix length, not the user count.</p>
+      </article>
+      <article class="bento-card">
+        <span class="feature-icon"><i data-lucide="calendar-days"></i></span>
+        <h3>Events & RSVP</h3>
+        <p>Calendar dict plus a min-heap for whatever is next.</p>
+      </article>
+      <article class="bento-card">
+        <span class="feature-icon"><i data-lucide="messages-square"></i></span>
+        <h3>Clubs & groups</h3>
+        <p>Public groups open to all, private ones gated by owner approval.</p>
+      </article>
+      <article class="bento-card wide">
+        <span class="feature-icon"><i data-lucide="shield-check"></i></span>
+        <h3>Roles & moderation</h3>
+        <p>Admin-only role changes, a role log, report queues and post review — enforced in the engine, not the template.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="section-head scroll-reveal">
+      <span class="eyebrow">How it works</span>
+      <h2>Three moves to find your people.</h2>
+    </div>
+    <div class="steps stagger">
+      <article class="step">
+        <span class="num">01 / SIGN UP</span>
+        <h3>Make a profile</h3>
+        <p>Pick a username, tell people what you study. Passwords are salted and hashed.</p>
+      </article>
+      <article class="step">
+        <span class="num">02 / CONNECT</span>
+        <h3>Build your graph</h3>
+        <p>Send requests, accept the ones that matter, and watch second-degree suggestions appear.</p>
+      </article>
+      <article class="step">
+        <span class="num">03 / PARTICIPATE</span>
+        <h3>Post, RSVP, join</h3>
+        <p>Share updates, react to your connections, RSVP to events and join communities.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="cta-band scroll-reveal">
+    <div>
+      <h2>Ready to see your CU-Kizuna graph?</h2>
+      <p>Create an account in seconds. Bring a few friends and the suggestions start working.</p>
+    </div>
+    <div class="hero-actions">
+      <a class="btn btn-primary magnetic" href="{{ url_for('signup') }}">Join CU-Kizuna</a>
+      <a class="btn btn-ghost" href="{{ url_for('login') }}">Sign in</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <span>CU-Kizuna · DSA mini project · Python + SQLite + Flask</span>
+  <span>Graphs in memory. Rows in SQLite. No shortcuts.</span>
+  <span><a href="https://chanakyauniversity.edu.in/campus/" target="_blank" rel="noopener">Campus photo: Chanakya University</a></span>
+</footer>
+{% endblock %}

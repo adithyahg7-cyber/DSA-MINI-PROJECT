@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — CU-Kizuna{% endblock %}
+{% block bodyclass %}public{% endblock %}
+{% block body %}
+<main class="error-page">
+  <div>
+    <div class="code">{{ code }}</div>
+    <h1>{% if code == 404 %}That page took a walk.{% elif code == 403 %}Not your door.{% else %}Something broke.{% endif %}</h1>
+    <p>{{ message }}</p>
+    <div class="hero-actions" style="justify-content:center">
+      <a class="btn btn-primary" href="{{ url_for('feed') if me else url_for('index') }}">
+        <i data-lucide="home"></i> {{ 'Back to feed' if me else 'Back home' }}
+      </a>
+      {% if not me %}<a class="btn btn-ghost" href="{{ url_for('login') }}">Sign in</a>{% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

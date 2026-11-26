@@ -1,0 +1,84 @@
+{% extends "shell.html" %}
+{% block title %}{{ event.title }} — CU-Kizuna{% endblock %}
+{% block main %}
+<a class="btn btn-ghost btn-sm" href="{{ url_for('events') }}" style="margin-bottom:16px"><i data-lucide="arrow-left"></i> All events</a>
+
+<section class="card glass reveal" style="margin-bottom:18px">
+  <div style="display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap">
+    <span class="date-chip" style="width:64px;height:68px;flex-basis:64px">
+      <strong style="font-size:24px">{{ event.date[8:10] }}</strong><small>{{ event.date[0:7] }}</small>
+    </span>
+    <div style="flex:1; min-width:240px">
+      <div class="chip-row" style="margin:0 0 8px">
+        <span class="tag cyan">{{ event.date }}</span>
+        <span class="tag">{{ event.time }}</span>
+        {% if event.community_id %}<span class="tag violet">community</span>{% endif %}
+      </div>
+      <h1 style="font-size:32px">{{ event.title }}</h1>
+      <p class="muted" style="margin-top:10px">{{ event.description }}</p>
+      <div class="event-meta" style="margin-top:14px">
+        <span><i data-lucide="map-pin"></i> {{ event.venue }}</span>
+        <span><i data-lucide="user"></i> organised by {{ event.organiser }}</span>
+        <span><i data-lucide="users"></i> {{ count }} going</span>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px; min-width:160px">
+      {% if going %}
+      <span class="tag lime"><i data-lucide="check"></i> You are going</span>
+      <form method="post" action="{{ url_for('cancel_rsvp', event_id=event.event_id) }}">
+        <input type="hidden" name="next" value="{{ here }}">
+        <button class="btn btn-ghost btn-sm btn-block" type="submit">Cancel RSVP</button>
+      </form>
+      {% else %}
+      <form method="post" action="{{ url_for('rsvp', event_id=event.event_id) }}">
+        <input type="hidden" name="next" value="{{ here }}">
+        <button class="btn btn-primary btn-block" type="submit"><i data-lucide="ticket"></i> RSVP</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  {% if attendees %}
+  <div class="chip-row" style="margin-top:16px">
+    <span class="tag">Going</span>
+    {% for name in attendees %}<a class="tag violet" href="{{ url_for('profile', username=name) }}">{{ name }}</a>{% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<div class="split">
+  <section>
+    <div class="card-head"><h3>Catalog</h3><span class="tag">{{ catalog|length }} items</span></div>
+    {% if catalog %}
+    <div class="media-grid">
+      {% for media in catalog %}
+      {% set is_video = media.path.lower().endswith(('.mp4', '.webm', '.mov')) %}
+      <figure class="media-item" data-lightbox data-src="{{ media.path }}" data-type="{{ 'video' if is_video else 'image' }}">
+        {% if is_video %}
+        <video controls src="{{ media.path }}" preload="metadata"></video>
+        {% else %}
+        <img src="{{ media.path }}" alt="event media">
+        {% endif %}
+        <div class="media-actions">
+          <a href="{{ media.path }}" download aria-label="Download media" title="Download"><i data-lucide="download"></i></a>
+        </div>
+        <figcaption class="cap">by {{ media.uploader }} · {{ media.created_at|timeago }}</figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty"><strong>No media yet.</strong> Organisers can upload photos and videos below.</div>
+    {% endif %}
+  </section>
+
+  {% if me_user.role in ['organiser', 'admin'] %}
+  <section class="card glass reveal">
+    <div class="card-head"><h3>Upload media</h3></div>
+    <form method="post" action="{{ url_for('upload_media', event_id=event.event_id) }}" enctype="multipart/form-data">
+      <label class="field"><span>Image or video</span><input class="input" type="file" name="file" accept="image/*,video/*" required></label>
+      <button class="btn btn-primary btn-sm btn-block" type="submit"><i data-lucide="upload"></i> Upload to catalog</button>
+    </form>
+    <p class="muted small" style="margin-top:10px">Files go to `uploads/`; the database stores only the path and uploader.</p>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

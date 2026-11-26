@@ -1,0 +1,65 @@
+{% extends "shell.html" %}
+{% block title %}Feed — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Home</span>
+    <h1>Good to see you, {{ me_user.name.split()[0] }}.</h1>
+    <p>Your connections, your campus, your next conversation.</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-ghost" href="{{ url_for('search') }}"><i data-lucide="search"></i> Find people</a>
+  </div>
+</div>
+
+<div class="tabs">
+  <a class="tab {{ 'active' if tab == 'explore' }}" href="{{ url_for('feed', tab='explore') }}">Explore</a>
+  <a class="tab {{ 'active' if tab == 'connections' }}" href="{{ url_for('feed', tab='connections') }}">Connections</a>
+  <a class="tab {{ 'active' if tab == 'trending' }}" href="{{ url_for('feed', tab='trending') }}">Trending</a>
+</div>
+
+<section class="card composer spotlight reveal">
+  <form method="post" action="{{ url_for('create_post') }}" enctype="multipart/form-data">
+    <input type="hidden" name="next" value="{{ here }}">
+    <textarea name="text" data-autosize placeholder="Share something with CU-Kizuna…"></textarea>
+    <div class="composer-foot">
+      <div class="composer-hint">
+        <label class="file-chip"><i data-lucide="image-plus"></i> Add media<input type="file" name="media" accept="image/*,video/*" multiple></label>
+        <span class="tag">posts appear in Explore</span>
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="send"></i> Post</button>
+    </div>
+  </form>
+</section>
+
+{% if items %}
+  {% for item in items %}
+    {% if tab == 'trending' and scores.get(item.post.post_id) %}
+    <div class="chip-row" style="margin: 0 4px 6px">
+      <span class="tag pink"><i data-lucide="flame"></i> trending score {{ scores[item.post.post_id] }}</span>
+    </div>
+    {% endif %}
+    {% include "_post.html" %}
+  {% endfor %}
+{% else %}
+  <div class="empty">
+    <strong>Nothing here yet.</strong>
+    {% if tab == 'connections' %}
+      Connect with people to fill this feed.
+    {% elif tab == 'trending' %}
+      Likes and comments on recent posts will surface the best ones.
+    {% else %}
+      Be the first to post something.
+    {% endif %}
+  </div>
+{% endif %}
+
+<div class="pager">
+  {% if tab != 'trending' and page > 0 %}
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('feed', tab=tab, page=page - 1) }}"><i data-lucide="arrow-left"></i> Newer</a>
+  {% endif %}
+  {% if tab != 'trending' and has_more %}
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('feed', tab=tab, page=page + 1) }}">Older <i data-lucide="arrow-right"></i></a>
+  {% endif %}
+</div>
+{% endblock %}

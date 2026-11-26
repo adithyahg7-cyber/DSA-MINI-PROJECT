@@ -1,0 +1,94 @@
+{% extends "shell.html" %}
+{% block title %}Events — CU-Kizuna{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Calendar</span>
+    <h1>What is happening.</h1>
+    <p>Upcoming events from the min-heap, plus a day view straight from the date dictionary.</p>
+  </div>
+</div>
+
+<form method="get" action="{{ url_for('events') }}" class="inline-form" style="margin-bottom:18px; max-width:420px">
+  <input class="input" type="date" name="date" value="{{ date or '' }}">
+  <button class="btn btn-ghost btn-sm" type="submit">Day view</button>
+  {% if date %}<a class="btn btn-ghost btn-sm" href="{{ url_for('events') }}">Clear</a>{% endif %}
+</form>
+
+{% if me_user.role in ['organiser', 'admin'] %}
+<details class="card glass reveal" style="margin-bottom:18px">
+  <summary class="drawer-summary"><i data-lucide="calendar-plus"></i> Add an event</summary>
+  <form method="post" action="{{ url_for('add_event') }}" style="margin-top:16px">
+    <input type="hidden" name="next" value="{{ here }}">
+    <div class="form-row">
+      <label class="field"><span>Title</span><input class="input" name="title" required></label>
+      <label class="field"><span>Venue</span><input class="input" name="venue" required></label>
+    </div>
+    <div class="form-row">
+      <label class="field"><span>Date</span><input class="input" type="date" name="date" required></label>
+      <label class="field"><span>Time</span><input class="input" type="time" name="time" required></label>
+    </div>
+    <label class="field"><span>Description</span><textarea class="textarea" name="description" required></textarea></label>
+    <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="plus"></i> Create event</button>
+  </form>
+</details>
+{% endif %}
+
+{% if items %}
+<div class="event-grid stagger">
+  {% for event in items %}
+  <article class="card event-card spotlight reveal">
+    <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start">
+      <div>
+        <span class="tag cyan">{{ event.date }}</span>
+        <h3 style="margin-top:10px">{{ event.title }}</h3>
+      </div>
+      <span class="date-chip"><strong>{{ event.date[8:10] }}</strong><small>{{ event.date[5:7] }}</small></span>
+    </div>
+    <p class="muted small">{{ event.description[:130] }}{% if event.description|length > 130 %}…{% endif %}</p>
+    <div class="event-meta">
+      <span><i data-lucide="clock"></i> {{ event.time }}</span>
+      <span><i data-lucide="map-pin"></i> {{ event.venue }}</span>
+      <span><i data-lucide="user"></i> {{ event.organiser }}</span>
+    </div>
+    <div class="event-foot">
+      <span class="tag">{{ 'club event' if event.community_id else 'CU-Kizuna event' }}</span>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('event_detail', event_id=event.event_id) }}">Open <i data-lucide="arrow-up-right"></i></a>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty"><strong>No events {{ 'on ' + date if date else 'coming up' }}.</strong>{% if me_user.role in ['organiser', 'admin'] %} Add the first one above.{% endif %}</div>
+{% endif %}
+
+<section style="margin-top:28px">
+  <div class="card-head"><h3>Event pitches</h3><span class="tag">queue</span></div>
+  <div class="grid-2">
+    <section class="card glass reveal">
+      <div class="card-head"><h3>Propose an event</h3></div>
+      <form method="post" action="{{ url_for('propose_pitch') }}">
+        <input type="hidden" name="next" value="{{ here }}">
+        <label class="field"><span>Title</span><input class="input" name="title" required></label>
+        <label class="field"><span>Why should it happen?</span><textarea class="textarea" name="description" required></textarea></label>
+        <button class="btn btn-ghost btn-sm" type="submit"><i data-lucide="lightbulb"></i> Submit pitch</button>
+      </form>
+    </section>
+    <section class="card glass reveal">
+      <div class="card-head"><h3>{{ 'All pitches' if me_user.role == 'admin' else 'Your pitches' }}</h3></div>
+      {% if pitches %}
+      <div class="list">
+        {% for pitch in pitches %}
+        <div class="row-card">
+          <span class="tag {{ 'lime' if pitch.status == 'approved' else ('pink' if pitch.status == 'rejected' else '') }}">{{ pitch.status }}</span>
+          <div class="meta"><strong>{{ pitch.title }}</strong><small>{{ pitch.description[:80] }}</small></div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="muted">No pitches yet.</p>
+      {% endif %}
+    </section>
+  </div>
+</section>
+{% endblock %}

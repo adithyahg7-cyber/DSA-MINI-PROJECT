@@ -1,0 +1,104 @@
+{% from "_comments.html" import render as render_comments with context %}
+<article class="card post spotlight reveal" id="post-{{ item.post.post_id }}">
+  <header class="post-head">
+    {% if item.author and item.author.avatar %}
+    <img class="avatar" src="{{ url_for('uploaded', filename=item.author.avatar) }}" alt="">
+    {% else %}
+    <span class="avatar">{{ item.author.name|initials if item.author else '?' }}</span>
+    {% endif %}
+    <div class="post-who">
+      <a class="strong" href="{{ url_for('profile', username=item.post.author) }}">
+        {{ item.author.name if item.author else item.post.author }}
+      </a>
+      <small>
+        @{{ item.post.author }} · {{ item.post.created_at|timeago }}
+        {% if item.post.community_id %}
+          · <a href="{{ url_for('community_detail', community_id=item.post.community_id) }}">community</a>
+        {% endif %}
+      </small>
+    </div>
+    <div class="post-tools">
+      {% if item.post.author == me or me_user.role == 'admin' %}
+      <form method="post" action="{{ url_for('delete_post', post_id=item.post.post_id) }}" onsubmit="return confirm('Delete this post?')">
+        <input type="hidden" name="next" value="{{ here }}">
+        <button class="icon-btn sm" type="submit" title="Delete"><i data-lucide="trash-2"></i></button>
+      </form>
+      {% endif %}
+      <details class="menu">
+        <summary class="icon-btn sm" title="More"><i data-lucide="more-horizontal"></i></summary>
+        <div class="menu-panel">
+          {% if item.post.author != me %}
+          <form method="post" action="{{ url_for('report_post', post_id=item.post.post_id) }}" data-ajax="report">
+            <input type="hidden" name="next" value="{{ here }}">
+            <input class="input" name="reason" placeholder="Reason for report" required>
+            <button class="btn btn-ghost btn-sm" type="submit">Report post</button>
+          </form>
+          {% else %}
+          <p class="muted small">This is your post.</p>
+          {% endif %}
+        </div>
+      </details>
+    </div>
+  </header>
+
+  {% if item.post.text %}
+  <p class="post-text">{{ item.post.text }}</p>
+  {% endif %}
+
+  {% if item.post.media %}
+  <div class="post-media-grid">
+    {% for media in item.post.media %}
+    {% set is_video = media.path.lower().endswith(('.mp4', '.webm', '.mov')) %}
+    <figure class="media-item" data-lightbox data-src="{{ media.path }}" data-type="{{ 'video' if is_video else 'image' }}">
+      {% if is_video %}
+      <video src="{{ media.path }}" controls preload="metadata"></video>
+      {% else %}
+      <img src="{{ media.path }}" alt="post media">
+      {% endif %}
+      <div class="media-actions">
+        <a href="{{ media.path }}" download aria-label="Download media" title="Download"><i data-lucide="download"></i></a>
+      </div>
+    </figure>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <footer class="post-actions">
+    {% if item.liked %}
+    <form method="post" action="{{ url_for('unlike_post', post_id=item.post.post_id) }}" data-ajax="unlike">
+      <input type="hidden" name="next" value="{{ here }}">
+      <button class="pill liked" type="submit"><i data-lucide="heart"></i> {{ item.likes }}</button>
+    </form>
+    {% else %}
+    <form method="post" action="{{ url_for('like_post', post_id=item.post.post_id) }}" data-ajax="like">
+      <input type="hidden" name="next" value="{{ here }}">
+      <button class="pill" type="submit"><i data-lucide="heart"></i> {{ item.likes }}</button>
+    </form>
+    {% endif %}
+
+    <a class="pill" href="#post-{{ item.post.post_id }}-comments">
+      <i data-lucide="message-circle"></i> {{ item.comment_count }}
+    </a>
+
+    {% if item.saved %}
+    <form method="post" action="{{ url_for('unsave_post', post_id=item.post.post_id) }}" data-ajax="unsave">
+      <input type="hidden" name="next" value="{{ here }}">
+      <button class="pill saved" type="submit"><i data-lucide="bookmark-check"></i> Saved</button>
+    </form>
+    {% else %}
+    <form method="post" action="{{ url_for('save_post', post_id=item.post.post_id) }}" data-ajax="save">
+      <input type="hidden" name="next" value="{{ here }}">
+      <button class="pill" type="submit"><i data-lucide="bookmark"></i> Save</button>
+    </form>
+    {% endif %}
+  </footer>
+
+  <section class="post-comments" id="post-{{ item.post.post_id }}-comments">
+    {{ render_comments(item.comments, item.post.post_id) }}
+    <form method="post" action="{{ url_for('comment_post', post_id=item.post.post_id) }}" class="inline-form comment-form" data-ajax="comment">
+      <input type="hidden" name="next" value="{{ here }}">
+      <input class="input" name="text" placeholder="Add a comment…" required>
+      <button class="btn btn-primary btn-sm" type="submit"><i data-lucide="send"></i></button>
+    </form>
+  </section>
+</article>
