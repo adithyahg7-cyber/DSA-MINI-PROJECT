@@ -143,6 +143,10 @@ strong { font-weight: 600; }
   box-shadow: 0 0 24px var(--glow);
 }
 .brand-word { font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; }
+.brand-logo {
+  width: 34px; height: 34px; flex: 0 0 34px; object-fit: cover;
+  border-radius: 10px; box-shadow: 0 0 24px var(--glow);
+}
 
 .nav { display: flex; flex-direction: column; gap: 4px; }
 .nav-item {
@@ -505,7 +509,7 @@ body.public::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: url("../img/campus-arch.jpg") center 35% / cover no-repeat;
+  background: url("../img/campus-background.webp") center 30% / cover no-repeat;
   opacity: 0.12;
   filter: grayscale(0.35) blur(1px);
 }

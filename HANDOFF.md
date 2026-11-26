@@ -26,7 +26,8 @@ Hard rules from `PROJECT_SPEC.md`:
   and admin-only graph tools are all wired and smoke-tested.
 - Demo data: seeded by `seed_demo.py`. It exits without changes if demo users exist.
 - Persistence: verified across restart, including new media/message tables.
-- Remaining work: submission polish only (report, DS log, viva preparation, GitHub link).
+- Repository: https://github.com/vaibavl/CU-Kizuna (public, `main` branch).
+- Remaining work: submission polish only (report, DS log, viva preparation).
   No new features are required.
 
 ## Run

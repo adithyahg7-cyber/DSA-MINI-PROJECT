@@ -3,6 +3,8 @@
 CU-Kizuna is a campus social network for the DSA mini project at Chanakya University (B.Tech CS&AI).
 It ships two interfaces over one engine: a Flask web app and a console harness.
 
+Repository: https://github.com/vaibavl/CU-Kizuna
+
 The point of the project is the data structures, not the framework. Every graph, trie,
 heap, and feed operation runs in Python on in-memory structures. SQLite only stores rows
 and is read back into memory at startup.
